@@ -40,3 +40,14 @@ if "Cube" in bpy.data.objects:
     bpy.data.objects['Cube'].select_set(True)
     bpy.context.view_layer.objects.active = bpy.data.objects['Cube']
     bpy.ops.object.delete()
+
+font_data = bpy.data.fonts.load("/home/dwrensha/fonts/DejaVuSansCondensed.ttf")
+
+bpy.ops.object.text_add(
+    enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
+
+bpy.context.object.data.body = """f : ℝ → ℝ
+hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
+⊢ ∀ x ≤ 0, f x = 0"""
+
+bpy.context.object.data.font = font_data
