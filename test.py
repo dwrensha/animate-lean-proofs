@@ -52,5 +52,17 @@ bpy.context.object.name = "Math1"
 bpy.context.object.data.body = """f : ℝ → ℝ
 hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
 ⊢ ∀ x ≤ 0, f x = 0"""
+bpy.context.object.data.font = font_data
+
+
+bpy.ops.object.text_add(
+    enter_editmode=False, align='WORLD', location=(0, -10, 0), scale=(1, 1, 1))
+bpy.context.object.name = "Math2"
+
+bpy.context.object.data.body = """f : ℝ → ℝ
+hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
+hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
+⊢ ∀ x ≤ 0, f x = 0
+"""
 
 bpy.context.object.data.font = font_data
