@@ -47,6 +47,7 @@ font_data = bpy.data.fonts.load(FONTPATH)
 
 bpy.ops.object.text_add(
     enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
+bpy.context.object.name = "Math1"
 
 bpy.context.object.data.body = """f : ℝ → ℝ
 hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
