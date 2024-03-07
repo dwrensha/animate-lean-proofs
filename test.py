@@ -35,6 +35,14 @@ bpy.context.scene.render.filepath = "/tmp/out.png"
 bpy.context.scene.render.resolution_x = 1920
 bpy.context.scene.render.resolution_y = 1080
 
+
+CAMERA = bpy.data.objects["Camera"]
+CAMERA.data.type = "ORTHO"
+CAMERA.data.ortho_scale = 20
+
+CAMERA.location = (6, 0, 1)
+CAMERA.rotation_euler  = (0,0,0)
+
 # delete the default cube
 if "Cube" in bpy.data.objects:
     bpy.data.objects['Cube'].select_set(True)
