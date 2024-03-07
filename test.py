@@ -30,7 +30,7 @@ use_gpu_render()
 bpy.context.scene.cycles.feature_set = 'EXPERIMENTAL' # for adaptive subdivision
 bpy.context.scene.cycles.dicing_rate = 0.25
 
-bpy.context.scene.render.filepath = "/tmp/out.png"
+bpy.context.scene.render.filepath = "/tmp/out"
 
 bpy.context.scene.render.resolution_x = 1920
 bpy.context.scene.render.resolution_y = 1080
@@ -62,6 +62,7 @@ class Goal:
         bpy.context.view_layer.update()
         self.char_width=cobj.dimensions.x
         self.char_height=cobj.dimensions.y
+        self.line_height = self.char_height * 1.8
         bpy.ops.object.delete()
 
         bpy.ops.object.empty_add(location=location)
@@ -69,11 +70,11 @@ class Goal:
         self.top.name = "Goal"
         self.lines = []
         yidx = 1
+        max_row_idx = 0
         for line in string.splitlines():
-            print(line)
             xidx = 0
 
-            bpy.ops.object.empty_add(location = (0,yidx * self.char_height * -1.8, 0))
+            bpy.ops.object.empty_add(location = (0,yidx * self.line_height * -1, 0))
             currentline = bpy.context.object
             currentline.parent = self.top
 
@@ -85,11 +86,18 @@ class Goal:
                 xidx += 1
                 cobj.data.font = MONOFONT
 
+            if xidx > max_row_idx:
+                max_row_idx = xidx
             yidx += 1
             self.lines.append(currentline)
 
-
-        #bpy.ops.mesh.primitive_plane_add(size=2)
+        width = max_row_idx * self.char_width
+        height = yidx * self.line_height
+        bpy.ops.mesh.primitive_plane_add(
+            location=(0,0,-0.1),
+            scale=(0.1,0.1,0.1))
+        self.panel = bpy.context.object
+        self.panel.parent = self.top
 
 
 #bpy.ops.object.text_add(
