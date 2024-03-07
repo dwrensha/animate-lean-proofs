@@ -47,32 +47,39 @@ MONOFONT = bpy.data.fonts.load(MONOFONTPATH)
 
 class AtomizedText:
     def __init__(self, string, location = (0,0,0)):
+        bpy.ops.object.text_add()
+        cobj = bpy.context.object
+        cobj.data.body = "M"
+        cobj.data.font = MONOFONT
+        bpy.context.view_layer.update()
+        self.char_width=cobj.dimensions.x
+        self.char_height=cobj.dimensions.y
+        bpy.ops.object.delete()
+
         bpy.ops.object.empty_add(location=location)
         self.top = bpy.context.object
         self.top.name = "AtomizedText"
-        self.chars = []
-        self.char_width = 0
-        self.char_height = 0
-        xidx = 0
+        self.lines = []
         yidx = 0
-        for c in string:
-            if c == '\n':
-                xidx = 0
-                yidx += 1
-                continue
-            bpy.ops.object.text_add(
-                location = (xidx * self.char_width, yidx * self.char_height * -1, 0))
-            cobj = bpy.context.object
-            cobj.data.body = c
-            cobj.parent = self.top
-            xidx += 1
-            cobj.data.font = MONOFONT
-            if self.char_width == 0:
-                cobj.data.body = "M"
-                bpy.context.view_layer.update()
-                self.char_width=cobj.dimensions.x
-                self.char_height=cobj.dimensions.y * 1.8
+        for line in string.splitlines():
+            print(line)
+            xidx = 0
+
+            bpy.ops.object.empty_add(location = (0,yidx * self.char_height * -1.8, 0))
+            currentline = bpy.context.object
+            currentline.parent = self.top
+
+            for c in line:
+                bpy.ops.object.text_add(location = (xidx * self.char_width, 0, 0))
+                cobj = bpy.context.object
                 cobj.data.body = c
+                cobj.parent = currentline
+                xidx += 1
+                cobj.data.font = MONOFONT
+
+            yidx += 1
+            self.lines.append(currentline)
+
         pass
 
 #bpy.ops.object.text_add(
@@ -81,7 +88,8 @@ class AtomizedText:
 
 math1 = """f : ℝ → ℝ
 hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
-⊢ ∀ x ≤ 0, f x = 0"""
+⊢ ∀ x ≤ 0, f x = 0
+"""
 
 math2="""f : ℝ → ℝ
 hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
