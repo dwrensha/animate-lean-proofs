@@ -45,24 +45,49 @@ if "Cube" in bpy.data.objects:
 MONOFONTPATH = "/home/dwrensha/fonts/DejaVuSansMono.ttf"
 MONOFONT = bpy.data.fonts.load(MONOFONTPATH)
 
-bpy.ops.object.text_add(
-    enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
-bpy.context.object.name = "Math1"
+class AtomizedText:
+    def __init__(self, string, location = (0,0,0)):
+        bpy.ops.object.empty_add(location=location)
+        self.top = bpy.context.object
+        self.top.name = "AtomizedText"
+        self.chars = []
+        self.char_width = 0
+        self.char_height = 0
+        xidx = 0
+        yidx = 0
+        for c in string:
+            if c == '\n':
+                xidx = 0
+                yidx += 1
+                continue
+            bpy.ops.object.text_add(
+                location = (xidx * self.char_width, yidx * self.char_height * -1, 0))
+            cobj = bpy.context.object
+            cobj.data.body = c
+            cobj.parent = self.top
+            xidx += 1
+            cobj.data.font = MONOFONT
+            if self.char_width == 0:
+                cobj.data.body = "M"
+                bpy.context.view_layer.update()
+                self.char_width=cobj.dimensions.x
+                self.char_height=cobj.dimensions.y * 1.8
+                cobj.data.body = c
+        pass
 
-bpy.context.object.data.body = """f : ℝ → ℝ
+#bpy.ops.object.text_add(
+#    enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
+#bpy.context.object.name = "Math1"
+
+math1 = """f : ℝ → ℝ
 hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
 ⊢ ∀ x ≤ 0, f x = 0"""
-bpy.context.object.data.font = MONOFONT
 
-
-bpy.ops.object.text_add(
-    enter_editmode=False, align='WORLD', location=(0, -10, 0), scale=(1, 1, 1))
-bpy.context.object.name = "Math2"
-
-bpy.context.object.data.body = """f : ℝ → ℝ
+math2="""f : ℝ → ℝ
 hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
 hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 ⊢ ∀ x ≤ 0, f x = 0
 """
 
-bpy.context.object.data.font = MONOFONT
+a1 = AtomizedText(math1)
+a2 = AtomizedText(math2, location=(0,-8,0))
