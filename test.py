@@ -53,7 +53,7 @@ if "Cube" in bpy.data.objects:
 MONOFONTPATH = "/home/dwrensha/fonts/DejaVuSansMono.ttf"
 MONOFONT = bpy.data.fonts.load(MONOFONTPATH)
 
-class AtomizedText:
+class Goal:
     def __init__(self, string, location = (0,0,0)):
         bpy.ops.object.text_add()
         cobj = bpy.context.object
@@ -66,9 +66,9 @@ class AtomizedText:
 
         bpy.ops.object.empty_add(location=location)
         self.top = bpy.context.object
-        self.top.name = "AtomizedText"
+        self.top.name = "Goal"
         self.lines = []
-        yidx = 0
+        yidx = 1
         for line in string.splitlines():
             print(line)
             xidx = 0
@@ -88,7 +88,9 @@ class AtomizedText:
             yidx += 1
             self.lines.append(currentline)
 
-        pass
+
+        #bpy.ops.mesh.primitive_plane_add(size=2)
+
 
 #bpy.ops.object.text_add(
 #    enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
@@ -105,5 +107,5 @@ hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 ⊢ ∀ x ≤ 0, f x = 0
 """
 
-a1 = AtomizedText(math1)
-a2 = AtomizedText(math2, location=(0,-8,0))
+a1 = Goal(math1)
+a2 = Goal(math2, location=(0,-8,0))
