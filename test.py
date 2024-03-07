@@ -60,6 +60,7 @@ class Goal:
         cobj.data.body = "M"
         cobj.data.font = MONOFONT
         bpy.context.view_layer.update()
+        self.margin = 0.25
         self.char_width=cobj.dimensions.x
         self.char_height=cobj.dimensions.y
         self.line_height = self.char_height * 1.8
@@ -69,17 +70,22 @@ class Goal:
         self.top = bpy.context.object
         self.top.name = "Goal"
         self.lines = []
-        yidx = 1
+        yidx = 0
         max_row_idx = 0
         for line in string.splitlines():
             xidx = 0
 
-            bpy.ops.object.empty_add(location = (0,yidx * self.line_height * -1, 0))
+            bpy.ops.object.empty_add(
+                location = (self.margin,
+                            (- self.char_height) +
+                              (yidx * self.line_height) * -1 - self.margin,
+                            0))
             currentline = bpy.context.object
             currentline.parent = self.top
 
             for c in line:
-                bpy.ops.object.text_add(location = (xidx * self.char_width, 0, 0))
+                bpy.ops.object.text_add(
+                    location = (xidx * self.char_width, 0, 0))
                 cobj = bpy.context.object
                 cobj.data.body = c
                 cobj.parent = currentline
@@ -91,13 +97,13 @@ class Goal:
             yidx += 1
             self.lines.append(currentline)
 
-        width = max_row_idx * self.char_width
-        height = yidx * self.line_height
+        width = max_row_idx * self.char_width + 2 * self.margin
+        height = yidx * self.line_height + 2 * self.margin
         bpy.ops.mesh.primitive_plane_add(
-            location=(0,0,-0.1),
-            scale=(0.1,0.1,0.1))
+            location=(width/2,- height/2,-0.05))
         self.panel = bpy.context.object
         self.panel.parent = self.top
+        self.panel.scale = (width/2,height/2,1)
 
 
 #bpy.ops.object.text_add(
