@@ -53,6 +53,12 @@ if "Cube" in bpy.data.objects:
 MONOFONTPATH = "/home/dwrensha/fonts/DejaVuSansMono.ttf"
 MONOFONT = bpy.data.fonts.load(MONOFONTPATH)
 
+PANEL_MATERIAL = bpy.data.materials.new(name="Panel")
+PANEL_MATERIAL.diffuse_color = (0.012, 0.045, 0.117, 1)
+
+TEXT_MATERIAL = bpy.data.materials.new(name="TextMaterial")
+TEXT_MATERIAL.diffuse_color = (1, 1, 1, 1)
+
 class Goal:
     def __init__(self, string, location = (0,0,0)):
         bpy.ops.object.text_add()
@@ -91,6 +97,7 @@ class Goal:
                 cobj.parent = currentline
                 xidx += 1
                 cobj.data.font = MONOFONT
+                cobj.data.materials.append(TEXT_MATERIAL)
 
             if xidx > max_row_idx:
                 max_row_idx = xidx
@@ -104,6 +111,7 @@ class Goal:
         self.panel = bpy.context.object
         self.panel.parent = self.top
         self.panel.scale = (width/2,height/2,1)
+        self.panel.data.materials.append(PANEL_MATERIAL)
 
 
 #bpy.ops.object.text_add(
@@ -116,6 +124,11 @@ hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
 """
 
 math2="""f : ℝ → ℝ
+hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
+⊢ ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
+"""
+
+math3="""f : ℝ → ℝ
 hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
 hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 ⊢ ∀ x ≤ 0, f x = 0
