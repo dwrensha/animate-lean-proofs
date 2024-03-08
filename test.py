@@ -75,26 +75,17 @@ class Goal:
         bpy.ops.object.empty_add(location=location)
         self.top = bpy.context.object
         self.top.name = "Goal"
-        self.lines = []
         yidx = 0
         max_row_idx = 0
         for line in string.splitlines():
             xidx = 0
 
-            bpy.ops.object.empty_add(
-                location = (self.margin,
-                            (- self.char_height) +
-                              (yidx * self.line_height) * -1 - self.margin,
-                            0))
-            currentline = bpy.context.object
-            currentline.parent = self.top
-
             for c in line:
                 bpy.ops.object.text_add(
-                    location = (xidx * self.char_width, 0, 0))
+                    location = self.to_location(xidx, yidx))
                 cobj = bpy.context.object
                 cobj.data.body = c
-                cobj.parent = currentline
+                cobj.parent = self.top
                 xidx += 1
                 cobj.data.font = MONOFONT
                 cobj.data.materials.append(TEXT_MATERIAL)
@@ -102,7 +93,6 @@ class Goal:
             if xidx > max_row_idx:
                 max_row_idx = xidx
             yidx += 1
-            self.lines.append(currentline)
 
         width = max_row_idx * self.char_width + 2 * self.margin
         height = yidx * self.line_height + 2 * self.margin
@@ -113,6 +103,11 @@ class Goal:
         self.panel.scale = (width/2,height/2,1)
         self.panel.data.materials.append(PANEL_MATERIAL)
 
+    def to_location(self, xidx, yidx):
+        return (self.margin + xidx * self.char_width,
+                (- self.char_height) +
+                (yidx * self.line_height) * -1 - self.margin,
+                0)
 
 #bpy.ops.object.text_add(
 #    enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
