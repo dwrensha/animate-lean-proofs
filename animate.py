@@ -165,6 +165,7 @@ class Goal:
                 continue
             if obj.obj:
                 obj.obj.location = self.to_location(xidx, yidx)
+                obj.obj.scale = (1,1,1)
             xidx += 1
 
         for obj in self.deleted_objs:
@@ -189,7 +190,7 @@ class Goal:
         if c.isspace():
             cobj = None
         else:
-            bpy.ops.object.text_add()
+            bpy.ops.object.text_add(scale=(0,0,0))
             cobj = bpy.context.object
             cobj.data.body = c
             cobj.parent = self.top
@@ -277,3 +278,8 @@ a2.set_keyframe(0)
 a2.apply_edits(edits)
 print(a2.to_text())
 a2.set_keyframe(30)
+
+edits2 = [MoveCursor(2), Delete(3), Insert("f (x + (t - x))")]
+a2.apply_edits(edits2)
+print(a2.to_text())
+a2.set_keyframe(45)
