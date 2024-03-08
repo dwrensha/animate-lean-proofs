@@ -145,18 +145,25 @@ class Goal:
         self.panel.data.materials.append(PANEL_MATERIAL)
 
         self.objs = []
-        self.deleted_objs = []
+        self.all_objs = []
         self.cursor = 0
         self.clipboard = []
 
         for c in string:
             self.objs.append(self.new_char_obj(c))
 
-    def lay_out(self):
+        # snapshots of self.objs
+        self.keyframes = [self.objs]
+
+    def lay_out(self, idx):
+        for obj in self.all_objs:
+            if obj.obj:
+                obj.obj.scale = (0,0,0)
+
         xidx = 0
         yidx = 0
         max_row_idx = 0
-        for obj in self.objs:
+        for obj in self.keyframes[idx]:
             if obj.c == "\n":
                 if xidx > max_row_idx:
                     max_row_idx = xidx
@@ -168,18 +175,15 @@ class Goal:
                 obj.obj.scale = (1,1,1)
             xidx += 1
 
-        for obj in self.deleted_objs:
-            if obj.obj:
-                obj.obj.scale = (0,0,0)
         width = max_row_idx * self.char_width + 2 * self.margin
         height = yidx * self.line_height + 2 * self.margin
         self.panel.scale = (width/2,height/2,1)
         self.panel.location=(width/2,- height/2,-0.05)
 
-    def set_keyframe(self, frame):
+    def set_keyframe(self, idx, frame):
         bpy.context.scene.frame_set(frame)
-        self.lay_out()
-        for obj in self.objs + self.deleted_objs:
+        self.lay_out(idx)
+        for obj in self.all_objs:
             if obj.obj:
                 obj.obj.keyframe_insert(data_path="location", index=-1, frame=frame)
                 obj.obj.keyframe_insert(data_path="scale", index=-1, frame=frame)
@@ -196,7 +200,9 @@ class Goal:
             cobj.parent = self.top
             cobj.data.font = MONOFONT
             cobj.data.materials.append(TEXT_MATERIAL)
-        return CharObj(c, cobj)
+        result = CharObj(c, cobj)
+        self.all_objs.append(result)
+        return result
 
     def to_location(self, xidx, yidx):
         return (self.margin + xidx * self.char_width,
@@ -218,8 +224,6 @@ class Goal:
                 self.cursor += len(new_objs)
             elif type(e) is Delete:
                 assert(self.cursor + e.length <= len(self.objs))
-                for o in self.objs[self.cursor:self.cursor + e.length]:
-                    self.deleted_objs.append(o)
                 self.objs = self.objs[:self.cursor] + self.objs[self.cursor + e.length:]
             elif type(e) is Cut:
                 assert(self.cursor + e.length <= len(self.objs))
@@ -232,7 +236,8 @@ class Goal:
             else :
                 raise Exception("unknown edit type: {}".format(e))
 
-        pass
+        self.keyframes.append(self.objs)
+        self.lay_out(len(self.keyframes)-1)
 
     def to_text(self):
         text = ""
@@ -273,13 +278,14 @@ hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 a2 = Goal(math2, location=(1,0,0))
 #a3 = Goal(math3, location=(0,-12,0))
 print(a2.to_text())
-a2.set_keyframe(0)
-
 a2.apply_edits(edits)
 print(a2.to_text())
-a2.set_keyframe(30)
+
 
 edits2 = [MoveCursor(2), Delete(3), Insert("f (x + (t - x))")]
 a2.apply_edits(edits2)
 print(a2.to_text())
-a2.set_keyframe(45)
+
+a2.set_keyframe(0, 0)
+a2.set_keyframe(1, 30)
+a2.set_keyframe(2, 45)
