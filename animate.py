@@ -112,19 +112,24 @@ PANEL_MATERIAL.diffuse_color = (0.012, 0.045, 0.117, 1)
 TEXT_MATERIAL = bpy.data.materials.new(name="TextMaterial")
 TEXT_MATERIAL.diffuse_color = (1, 1, 1, 1)
 
-class Goal:
-    def __init__(self, string, location = (0,0,0)):
-        bpy.ops.object.text_add()
-        cobj = bpy.context.object
-        cobj.data.body = "M"
-        cobj.data.font = MONOFONT
-        bpy.context.view_layer.update()
-        self.margin = 0.25
-        self.char_width=cobj.dimensions.x
-        self.char_height=cobj.dimensions.y
-        self.line_height = self.char_height * 1.8
-        bpy.ops.object.delete()
+def get_font_dimensions():
+    bpy.ops.object.text_add()
+    cobj = bpy.context.object
+    cobj.data.body = "M"
+    cobj.data.font = MONOFONT
+    bpy.context.view_layer.update()
+    dims = cobj.dimensions
+    bpy.ops.object.delete()
+    return dims
 
+class Goal:
+    def __init__(self, string, edits = [], location = (0,0,0)):
+        dims = get_font_dimensions()
+        self.char_width=dims.x
+        self.char_height=dims.y
+        self.line_height = self.char_height * 1.8
+
+        self.margin = 0.25
         bpy.ops.object.empty_add(location=location)
         self.top = bpy.context.object
         self.top.name = "Goal"
