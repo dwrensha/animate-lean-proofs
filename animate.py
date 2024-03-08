@@ -91,9 +91,9 @@ bpy.context.scene.render.resolution_y = 1080
 
 CAMERA = bpy.data.objects["Camera"]
 CAMERA.data.type = "ORTHO"
-CAMERA.data.ortho_scale = 20
+CAMERA.data.ortho_scale = 23
 
-CAMERA.location = (6, 0, 1)
+CAMERA.location = (12, -1.5, 1)
 CAMERA.rotation_euler  = (0,0,0)
 
 # delete the default cube
@@ -286,6 +286,21 @@ edits2 = [MoveCursor(2), Delete(3), Insert("f (x + (t - x))")]
 a2.apply_edits(edits2)
 print(a2.to_text())
 
+a2.apply_edits([])
+
+edits3 = [MoveCursor(-15), Delete(15), Insert("(t - x) * f x + f (f x)")]
+a2.apply_edits(edits3)
+print(a2.to_text())
+
+a2.apply_edits([])
+
+edits4 = [MoveCursor(-23), Delete(13), Insert("t * f x - x * f x")]
+a2.apply_edits(edits4)
+
 a2.set_keyframe(0, 0)
 a2.set_keyframe(1, 30)
 a2.set_keyframe(2, 45)
+a2.set_keyframe(3, 60)
+a2.set_keyframe(4, 75)
+a2.set_keyframe(5, 90)
+a2.set_keyframe(6, 105)
