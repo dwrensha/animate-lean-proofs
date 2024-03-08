@@ -30,14 +30,14 @@ def apply_edits(edits, string):
         if type(e) is MoveCursor:
             cursor += e.offset
             assert(0 <= cursor)
-            assert(cursor < len(string))
+            assert(cursor <= len(string))
         elif type(e) is Insert:
             string = string[:cursor] + e.text + string[cursor:]
         elif type(e) is Delete:
-            assert(cursor + e.length < len(string))
+            assert(cursor + e.length <= len(string))
             string = string[:cursor] + string[cursor + e.length:]
         elif type(e) is Cut:
-            assert(cursor + e.length < len(string))
+            assert(cursor + e.length <= len(string))
             clipboard.append(string[cursor:cursor + e.length])
             string = string[:cursor] + string[cursor + e.length:]
         elif type(e) is Paste:
@@ -47,7 +47,7 @@ def apply_edits(edits, string):
             raise Exception("unknown edit type: {}".format(e))
     return string
 
-edits = [MoveCursor(2), Insert("ABC"), Delete()]
+edits = [MoveCursor(2), Insert("ABC"), Delete(), MoveCursor(-2), Cut(2), MoveCursor(5), Paste(), Delete(1)]
 print(apply_edits(edits, "hello"))
 
 TILE_THICK = 0.2
