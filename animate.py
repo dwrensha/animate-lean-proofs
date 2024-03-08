@@ -167,10 +167,23 @@ class Goal:
                 obj.obj.location = self.to_location(xidx, yidx)
             xidx += 1
 
+        for obj in self.deleted_objs:
+            if obj.obj:
+                obj.obj.scale = (0,0,0)
         width = max_row_idx * self.char_width + 2 * self.margin
         height = yidx * self.line_height + 2 * self.margin
         self.panel.scale = (width/2,height/2,1)
         self.panel.location=(width/2,- height/2,-0.05)
+
+    def set_keyframe(self, frame):
+        bpy.context.scene.frame_set(frame)
+        self.lay_out()
+        for obj in self.objs + self.deleted_objs:
+            if obj.obj:
+                obj.obj.keyframe_insert(data_path="location", index=-1, frame=frame)
+                obj.obj.keyframe_insert(data_path="scale", index=-1, frame=frame)
+        self.panel.keyframe_insert(data_path="scale", index=-1, frame=frame)
+        self.panel.keyframe_insert(data_path="location", index=-1, frame=frame)
 
     def new_char_obj(self, c):
         if c.isspace():
@@ -253,15 +266,14 @@ hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 ⊢ ∀ x ≤ 0, f x = 0
 """
 
-a1 = Goal(math1)
-a1.lay_out()
+#a1 = Goal(math1)
+#a1.lay_out()
 
-a2 = Goal(math2, location=(0,-8,0))
+a2 = Goal(math2, location=(1,0,0))
 #a3 = Goal(math3, location=(0,-12,0))
 print(a2.to_text())
-a2.lay_out()
-
+a2.set_keyframe(0)
 
 a2.apply_edits(edits)
 print(a2.to_text())
-#a2.lay_out()
+a2.set_keyframe(30)
