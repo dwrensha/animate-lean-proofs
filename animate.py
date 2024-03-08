@@ -139,6 +139,11 @@ class Goal:
         self.top = bpy.context.object
         self.top.name = "Goal"
 
+        bpy.ops.mesh.primitive_plane_add()
+        self.panel = bpy.context.object
+        self.panel.parent = self.top
+        self.panel.data.materials.append(PANEL_MATERIAL)
+
         self.objs = []
         self.deleted_objs = []
         self.cursor = 0
@@ -147,26 +152,25 @@ class Goal:
         for c in string:
             self.objs.append(self.new_char_obj(c))
 
-#        idx = 0
-#        xidx = 0
-#        yidx = 0
-#        max_row_idx = 0
-#        for c in string:
-#            if c == "\n":
-#                if xidx > max_row_idx:
-#                    max_row_idx = xidx
-#                yidx += 1
-#            else:
+    def lay_out(self):
+        xidx = 0
+        yidx = 0
+        max_row_idx = 0
+        for obj in self.objs:
+            if obj.c == "\n":
+                if xidx > max_row_idx:
+                    max_row_idx = xidx
+                yidx += 1
+                xidx = 0
+                continue
+            if obj.obj:
+                obj.obj.location = self.to_location(xidx, yidx)
+            xidx += 1
 
-
-#        width = max_row_idx * self.char_width + 2 * self.margin
-#        height = yidx * self.line_height + 2 * self.margin
-#        bpy.ops.mesh.primitive_plane_add(
-#            location=(width/2,- height/2,-0.05))
-#        self.panel = bpy.context.object
-#        self.panel.parent = self.top
-#        self.panel.scale = (width/2,height/2,1)
-#        self.panel.data.materials.append(PANEL_MATERIAL)
+        width = max_row_idx * self.char_width + 2 * self.margin
+        height = yidx * self.line_height + 2 * self.margin
+        self.panel.scale = (width/2,height/2,1)
+        self.panel.location=(width/2,- height/2,-0.05)
 
     def new_char_obj(self, c):
         if c.isspace():
@@ -180,7 +184,6 @@ class Goal:
             cobj.data.materials.append(TEXT_MATERIAL)
         return CharObj(c, cobj)
 
-
     def to_location(self, xidx, yidx):
         return (self.margin + xidx * self.char_width,
                 (- self.char_height) +
@@ -192,7 +195,7 @@ class Goal:
             if type(e) is MoveCursor:
                 self.cursor += e.offset
                 assert(0 <= self.cursor)
-                assert(cursor <= len(self.objs))
+                assert(self.cursor <= len(self.objs))
             elif type(e) is Insert:
                 new_objs = []
                 for c in e.text:
@@ -251,6 +254,14 @@ hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 """
 
 a1 = Goal(math1)
+a1.lay_out()
+
 a2 = Goal(math2, location=(0,-8,0))
-a3 = Goal(math3, location=(0,-12,0))
-print(a3.to_text())
+#a3 = Goal(math3, location=(0,-12,0))
+print(a2.to_text())
+a2.lay_out()
+
+
+a2.apply_edits(edits)
+print(a2.to_text())
+#a2.lay_out()
