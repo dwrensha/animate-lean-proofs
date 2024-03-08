@@ -33,6 +33,7 @@ def apply_edits(edits, string):
             assert(cursor <= len(string))
         elif type(e) is Insert:
             string = string[:cursor] + e.text + string[cursor:]
+            cursor += len(e.text)
         elif type(e) is Delete:
             assert(cursor + e.length <= len(string))
             string = string[:cursor] + string[cursor + e.length:]
@@ -43,11 +44,14 @@ def apply_edits(edits, string):
         elif type(e) is Paste:
             t = clipboard.pop()
             string = string[:cursor] + t + string[cursor:]
+            cursor += len(t)
         else :
             raise Exception("unknown edit type: {}".format(e))
     return string
 
-edits = [MoveCursor(2), Insert("ABC"), Delete(), MoveCursor(-2), Cut(2), MoveCursor(5), Paste(), Delete(1)]
+edits = [MoveCursor(2), Insert("ABC"), MoveCursor(-3),
+         Delete(), MoveCursor(-2), Cut(2), MoveCursor(5), Paste(),
+         MoveCursor(-2), Delete(1)]
 print(apply_edits(edits, "hello"))
 
 TILE_THICK = 0.2
@@ -173,6 +177,17 @@ hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
 """
 
 math3="""f : ℝ → ℝ
+hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
+x t : ℝ
+⊢ f t ≤ t * f x - x * f x + f (f x)
+"""
+
+edits = [MoveCursor(63), Cut(7), MoveCursor(-3), Delete(6),
+         MoveCursor(-2), Paste(), Insert("\n")]
+math2_ = apply_edits(edits, math2)
+assert(math2_ == math3)
+
+math4="""f : ℝ → ℝ
 hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
 hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 ⊢ ∀ x ≤ 0, f x = 0
