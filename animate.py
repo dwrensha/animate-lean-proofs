@@ -112,6 +112,11 @@ PANEL_MATERIAL.diffuse_color = (0.012, 0.045, 0.117, 1)
 TEXT_MATERIAL = bpy.data.materials.new(name="TextMaterial")
 TEXT_MATERIAL.diffuse_color = (1, 1, 1, 1)
 
+@dataclass
+class CharObj:
+    c: str
+    obj: object
+
 def get_font_dimensions():
     bpy.ops.object.text_add()
     cobj = bpy.context.object
@@ -133,33 +138,48 @@ class Goal:
         bpy.ops.object.empty_add(location=location)
         self.top = bpy.context.object
         self.top.name = "Goal"
-        yidx = 0
-        max_row_idx = 0
-        for line in string.splitlines():
-            xidx = 0
 
-            for c in line:
-                bpy.ops.object.text_add(
-                    location = self.to_location(xidx, yidx))
-                cobj = bpy.context.object
-                cobj.data.body = c
-                cobj.parent = self.top
-                xidx += 1
-                cobj.data.font = MONOFONT
-                cobj.data.materials.append(TEXT_MATERIAL)
+        self.objs = []
+        self.deleted_objs = []
+        self.cursor = 0
+        self.clipboard = []
 
-            if xidx > max_row_idx:
-                max_row_idx = xidx
-            yidx += 1
+        for c in string:
+            self.objs.append(self.new_char_obj(c))
 
-        width = max_row_idx * self.char_width + 2 * self.margin
-        height = yidx * self.line_height + 2 * self.margin
-        bpy.ops.mesh.primitive_plane_add(
-            location=(width/2,- height/2,-0.05))
-        self.panel = bpy.context.object
-        self.panel.parent = self.top
-        self.panel.scale = (width/2,height/2,1)
-        self.panel.data.materials.append(PANEL_MATERIAL)
+#        idx = 0
+#        xidx = 0
+#        yidx = 0
+#        max_row_idx = 0
+#        for c in string:
+#            if c == "\n":
+#                if xidx > max_row_idx:
+#                    max_row_idx = xidx
+#                yidx += 1
+#            else:
+
+
+#        width = max_row_idx * self.char_width + 2 * self.margin
+#        height = yidx * self.line_height + 2 * self.margin
+#        bpy.ops.mesh.primitive_plane_add(
+#            location=(width/2,- height/2,-0.05))
+#        self.panel = bpy.context.object
+#        self.panel.parent = self.top
+#        self.panel.scale = (width/2,height/2,1)
+#        self.panel.data.materials.append(PANEL_MATERIAL)
+
+    def new_char_obj(self, c):
+        if c.isspace():
+            cobj = None
+        else:
+            bpy.ops.object.text_add()
+            cobj = bpy.context.object
+            cobj.data.body = c
+            cobj.parent = self.top
+            cobj.data.font = MONOFONT
+            cobj.data.materials.append(TEXT_MATERIAL)
+        return CharObj(c, cobj)
+
 
     def to_location(self, xidx, yidx):
         return (self.margin + xidx * self.char_width,
@@ -167,9 +187,41 @@ class Goal:
                 (yidx * self.line_height) * -1 - self.margin,
                 0)
 
-#bpy.ops.object.text_add(
-#    enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
-#bpy.context.object.name = "Math1"
+    def apply_edits(self, edits):
+        for e in edits:
+            if type(e) is MoveCursor:
+                self.cursor += e.offset
+                assert(0 <= self.cursor)
+                assert(cursor <= len(self.objs))
+            elif type(e) is Insert:
+                new_objs = []
+                for c in e.text:
+                    new_objs.append(self.new_char_obj(c))
+                self.objs = self.objs[:self.cursor] + new_objs + self.objs[self.cursor:]
+                self.cursor += len(new_objs)
+            elif type(e) is Delete:
+                assert(self.cursor + e.length <= len(self.objs))
+                for o in self.objs[self.cursor:self.cursor + e.length]:
+                    self.deleted_objs.append(o)
+                self.objs = self.objs[:self.cursor] + self.objs[self.cursor + e.length:]
+            elif type(e) is Cut:
+                assert(self.cursor + e.length <= len(self.objs))
+                self.clipboard.append(self.objs[self.cursor:self.cursor + e.length])
+                self.objs = self.objs[:self.cursor] + self.objs[self.cursor + e.length:]
+            elif type(e) is Paste:
+                t = self.clipboard.pop()
+                self.objs = self.objs[:self.cursor] + t + self.objs[self.cursor:]
+                self.cursor += len(t)
+            else :
+                raise Exception("unknown edit type: {}".format(e))
+
+        pass
+
+    def to_text(self):
+        text = ""
+        for obj in self.objs:
+            text += obj.c
+        return text
 
 math1 = """f : ℝ → ℝ
 hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
@@ -200,3 +252,5 @@ hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 
 a1 = Goal(math1)
 a2 = Goal(math2, location=(0,-8,0))
+a3 = Goal(math3, location=(0,-12,0))
+print(a3.to_text())
