@@ -1,7 +1,11 @@
+
 from dataclasses import dataclass
 import os
 import bpy
 
+import sys
+sys.path.append(os.getcwd())
+import common
 
 @dataclass
 class MoveCursor:
@@ -304,3 +308,5 @@ a2.set_keyframe(3, 60)
 a2.set_keyframe(4, 75)
 a2.set_keyframe(5, 90)
 a2.set_keyframe(6, 105)
+
+common.set_camera_view()
