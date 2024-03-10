@@ -279,10 +279,10 @@ hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 ⊢ ∀ x ≤ 0, f x = 0
 """
 
-#a1 = Goal(math1)
-#a1.lay_out()
+a1 = Goal(math1)
+a1.apply_edits([])
 
-a2 = Goal(math2, location=(1,0,0))
+a2 = Goal(math2, location=(0,-10,0))
 #a3 = Goal(math3, location=(0,-12,0))
 print(a2.to_text())
 a2.apply_edits(edits)
@@ -304,12 +304,12 @@ a2.apply_edits([])
 edits4 = [MoveCursor(-23), Delete(13), Insert("t * f x - x * f x")]
 a2.apply_edits(edits4)
 
-a2.set_keyframe(0, 0)
-a2.set_keyframe(1, 30)
-a2.set_keyframe(2, 45)
-a2.set_keyframe(3, 60)
-a2.set_keyframe(4, 75)
-a2.set_keyframe(5, 90)
-a2.set_keyframe(6, 105)
+a2.set_keyframe(0, 30)
+a2.set_keyframe(1, 60)
+a2.set_keyframe(2, 90)
+a2.set_keyframe(3, 120)
+a2.set_keyframe(4, 150)
+a2.set_keyframe(5, 180)
+a2.set_keyframe(6, 210)
 
 common.set_camera_view()
