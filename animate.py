@@ -132,7 +132,7 @@ def get_font_dimensions():
     return dims
 
 class Goal:
-    def __init__(self, string, edits = [], location = (0,0,0)):
+    def __init__(self, string, title=None, edits = [], location = (0,0,0)):
         dims = get_font_dimensions()
         self.char_width=dims.x
         self.char_height=dims.y
@@ -143,12 +143,26 @@ class Goal:
         self.top = bpy.context.object
         self.top.name = "Goal"
 
+        if title:
+            bpy.ops.object.text_add(scale=(0,0,0))
+            self.title = bpy.context.object
+            height = self.title.dimensions.y
+            self.title_height = height * 1.5
+            self.title.location = (self.margin, -height * 1.25, 0)
+            self.title.data.body = title
+            self.title.data.font = MONOFONT
+            self.title.parent = self.top
+        else:
+            self.title_height = 0
+            self.title = None
+
         bpy.ops.mesh.primitive_plane_add()
         self.panel_border = bpy.context.object
         self.panel_border.parent = self.top
         self.panel_border.data.materials.append(PANEL_BORDER_MATERIAL)
 
-        bpy.ops.object.empty_add(location=(self.margin, -self.margin, 0))
+        bpy.ops.object.empty_add(
+            location=(self.margin, -self.margin - self.title_height, 0))
         self.inner = bpy.context.object
         self.inner.name = "Inner"
         self.inner.parent = self.top
@@ -157,6 +171,7 @@ class Goal:
         self.panel = bpy.context.object
         self.panel.parent = self.inner
         self.panel.data.materials.append(PANEL_MATERIAL)
+
 
         self.objs = []
         self.all_objs = []
@@ -203,8 +218,9 @@ class Goal:
         self.panel.scale = (width/2,height/2,1)
         self.panel.location=(width/2,- height/2,-0.05)
 
-        self.panel_border.scale = (width/2 + self.margin ,height/2 + self.margin,1)
-        self.panel_border.location=(width/2 + self.margin,- height/2 - self.margin,-0.06)
+        border_height = height + self.title_height + 2 * self.margin
+        self.panel_border.scale = (width/2 + self.margin, border_height / 2, 1)
+        self.panel_border.location=(width/2 + self.margin,-border_height / 2,-0.06)
 
 
     def set_keyframe(self, idx, frame):
@@ -301,11 +317,14 @@ hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 ⊢ ∀ x ≤ 0, f x = 0
 """
 
-a1 = Goal(math1)
+a1 = Goal(math1, title="Main Goal")
 a1.apply_edits([])
 a1.center_camera(0)
 
-a2 = Goal(math2, location=(0,-6,0))
+a2 = Goal(math2,
+          #title="have hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)",
+          title="have hxt",
+          location=(0,-6,0))
 #a3 = Goal(math3, location=(0,-12,0))
 print(a2.to_text())
 a2.apply_edits(edits)
