@@ -169,20 +169,14 @@ class Goal:
         # snapshots of self.objs
         self.keyframes = [self.objs]
 
-    def dimensions(self):
-        return self.panel_border.dimensions
-
-    def center(self):
-        t = self.panel_border.matrix_world.translation
-        print(t)
-        dims = self.dimensions()
-        return t
-
     def center_camera(self, frame):
         bpy.context.scene.frame_set(frame)
-        center = self.center()
+        dims = self.panel_border.dimensions
+        center = self.panel_border.matrix_world.translation
         CAMERA.location = (center.x, center.y, 1)
         CAMERA.keyframe_insert(data_path="location", index=-1, frame=frame)
+        CAMERA.data.ortho_scale = dims.x * 1.2
+        CAMERA.data.keyframe_insert(data_path="ortho_scale", index=-1, frame=frame)
 
     def lay_out(self, idx):
         for obj in self.all_objs:
@@ -336,10 +330,16 @@ a2.apply_edits(edits4)
 a2.set_keyframe(0, 30)
 a2.center_camera(30)
 a2.set_keyframe(1, 60)
+a2.center_camera(60)
 a2.set_keyframe(2, 90)
+a2.center_camera(90)
 a2.set_keyframe(3, 120)
+a2.center_camera(120)
 a2.set_keyframe(4, 150)
+a2.center_camera(150)
 a2.set_keyframe(5, 180)
+a2.center_camera(180)
 a2.set_keyframe(6, 210)
+a2.center_camera(210)
 
 common.set_camera_view()
