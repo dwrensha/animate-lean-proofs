@@ -1,7 +1,6 @@
 import os
 import bpy
 
-TILE_THICK = 0.2
 yellowColor = (0.95, 0.829, 0.05, 1)
 brownColor = (0.0451939, 0.00518128, 0.00802261, 1)
 

@@ -53,12 +53,6 @@ def apply_edits(edits, string):
             raise Exception("unknown edit type: {}".format(e))
     return string
 
-edits = [MoveCursor(2), Insert("ABC"), MoveCursor(-3),
-         Delete(), MoveCursor(-2), Cut(2), MoveCursor(5), Paste(),
-         MoveCursor(-2), Delete(1)]
-print(apply_edits(edits, "hello"))
-
-TILE_THICK = 0.2
 yellowColor = (0.95, 0.829, 0.05, 1)
 brownColor = (0.0451939, 0.00518128, 0.00802261, 1)
 
@@ -174,6 +168,21 @@ class Goal:
 
         # snapshots of self.objs
         self.keyframes = [self.objs]
+
+    def dimensions(self):
+        return self.panel_border.dimensions
+
+    def center(self):
+        t = self.panel_border.matrix_world.translation
+        print(t)
+        dims = self.dimensions()
+        return t
+
+    def center_camera(self, frame):
+        bpy.context.scene.frame_set(frame)
+        center = self.center()
+        CAMERA.location = (center.x, center.y, 1)
+        CAMERA.keyframe_insert(data_path="location", index=-1, frame=frame)
 
     def lay_out(self, idx):
         for obj in self.all_objs:
@@ -300,8 +309,9 @@ hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 
 a1 = Goal(math1)
 a1.apply_edits([])
+a1.center_camera(0)
 
-a2 = Goal(math2, location=(0,-10,0))
+a2 = Goal(math2, location=(0,-6,0))
 #a3 = Goal(math3, location=(0,-12,0))
 print(a2.to_text())
 a2.apply_edits(edits)
@@ -324,6 +334,7 @@ edits4 = [MoveCursor(-23), Delete(13), Insert("t * f x - x * f x")]
 a2.apply_edits(edits4)
 
 a2.set_keyframe(0, 30)
+a2.center_camera(30)
 a2.set_keyframe(1, 60)
 a2.set_keyframe(2, 90)
 a2.set_keyframe(3, 120)
