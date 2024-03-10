@@ -116,6 +116,9 @@ MONOFONT = bpy.data.fonts.load(MONOFONTPATH)
 PANEL_MATERIAL = bpy.data.materials.new(name="Panel")
 PANEL_MATERIAL.diffuse_color = (0.012, 0.045, 0.117, 1)
 
+PANEL_BORDER_MATERIAL = bpy.data.materials.new(name="PanelBorder")
+PANEL_BORDER_MATERIAL.diffuse_color = (0.005, 0.02, 0.05, 1)
+
 TEXT_MATERIAL = bpy.data.materials.new(name="TextMaterial")
 TEXT_MATERIAL.diffuse_color = (1, 1, 1, 1)
 
@@ -147,8 +150,18 @@ class Goal:
         self.top.name = "Goal"
 
         bpy.ops.mesh.primitive_plane_add()
+        self.panel_border = bpy.context.object
+        self.panel_border.parent = self.top
+        self.panel_border.data.materials.append(PANEL_BORDER_MATERIAL)
+
+        bpy.ops.object.empty_add(location=(self.margin, -self.margin, 0))
+        self.inner = bpy.context.object
+        self.inner.name = "Inner"
+        self.inner.parent = self.top
+
+        bpy.ops.mesh.primitive_plane_add()
         self.panel = bpy.context.object
-        self.panel.parent = self.top
+        self.panel.parent = self.inner
         self.panel.data.materials.append(PANEL_MATERIAL)
 
         self.objs = []
@@ -187,6 +200,10 @@ class Goal:
         self.panel.scale = (width/2,height/2,1)
         self.panel.location=(width/2,- height/2,-0.05)
 
+        self.panel_border.scale = (width/2 + self.margin ,height/2 + self.margin,1)
+        self.panel_border.location=(width/2 + self.margin,- height/2 - self.margin,-0.06)
+
+
     def set_keyframe(self, idx, frame):
         bpy.context.scene.frame_set(frame)
         self.lay_out(idx)
@@ -196,6 +213,8 @@ class Goal:
                 obj.obj.keyframe_insert(data_path="scale", index=-1, frame=frame)
         self.panel.keyframe_insert(data_path="scale", index=-1, frame=frame)
         self.panel.keyframe_insert(data_path="location", index=-1, frame=frame)
+        self.panel_border.keyframe_insert(data_path="scale", index=-1, frame=frame)
+        self.panel_border.keyframe_insert(data_path="location", index=-1, frame=frame)
 
     def new_char_obj(self, c):
         if c.isspace():
@@ -204,7 +223,7 @@ class Goal:
             bpy.ops.object.text_add(scale=(0,0,0))
             cobj = bpy.context.object
             cobj.data.body = c
-            cobj.parent = self.top
+            cobj.parent = self.inner
             cobj.data.font = MONOFONT
             cobj.data.materials.append(TEXT_MATERIAL)
         result = CharObj(c, cobj)
