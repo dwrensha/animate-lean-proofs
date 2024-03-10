@@ -89,9 +89,12 @@ bpy.context.scene.cycles.dicing_rate = 0.25
 
 bpy.context.scene.render.filepath = "/tmp/out"
 
-bpy.context.scene.render.resolution_x = 1920
-bpy.context.scene.render.resolution_y = 1080
-
+RESOLUTION_X = 1920
+RESOLUTION_Y = 1080
+FPS = 60
+bpy.context.scene.render.resolution_x = RESOLUTION_X
+bpy.context.scene.render.resolution_y = RESOLUTION_Y
+bpy.context.scene.render.fps = FPS
 
 CAMERA = bpy.data.objects["Camera"]
 CAMERA.data.type = "ORTHO"
