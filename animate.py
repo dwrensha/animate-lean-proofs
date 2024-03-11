@@ -146,13 +146,16 @@ class Goal:
         self.top.name = "Goal"
 
         if title:
-            bpy.ops.object.text_add(scale=(0,0,0))
+            title_scale = 0.75
+            bpy.ops.object.text_add()
             self.title = bpy.context.object
+            self.title.scale=(title_scale, title_scale, title_scale)
+            self.title.data.body = title
+            self.title.data.font = MONOFONT
             height = self.title.dimensions.y
             self.title_height = height * 1.5
             self.title.location = (self.margin, -height * 1.25, 0)
-            self.title.data.body = title
-            self.title.data.font = MONOFONT
+
             self.title.parent = self.top
         else:
             self.title_height = 0
@@ -327,8 +330,8 @@ a1.apply_edits([])
 a1.center_camera(0)
 
 a2 = Goal(math2,
-          #title="have hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)",
-          title="have hxt",
+          title="have hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)",
+          #title="have hxt",
           location=(0,-6,0))
 #a3 = Goal(math3, location=(0,-12,0))
 print(a2.to_text())
