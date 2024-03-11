@@ -20,6 +20,10 @@ class Delete:
     length: int = 1
 
 @dataclass
+class DeleteAll:
+    pass
+
+@dataclass
 class Cut:
     length: int
 
@@ -49,6 +53,9 @@ def apply_edits(edits, string):
             t = clipboard.pop()
             string = string[:cursor] + t + string[cursor:]
             cursor += len(t)
+        elif type(e) is DeleteAll:
+            string = ""
+            cursor = 0
         else :
             raise Exception("unknown edit type: {}".format(e))
     return string
@@ -90,7 +97,7 @@ bpy.context.scene.render.resolution_x = RESOLUTION_X
 bpy.context.scene.render.resolution_y = RESOLUTION_Y
 bpy.context.scene.render.fps = FPS
 bpy.context.scene.frame_start = 0
-bpy.context.scene.frame_end = 300
+bpy.context.scene.frame_end = 400
 
 CAMERA = bpy.data.objects["Camera"]
 CAMERA.data.type = "ORTHO"
@@ -222,10 +229,15 @@ class Goal:
             xidx += 1
 
         width = max_row_idx * self.char_width + 2 * self.margin
+        height = yidx * self.line_height + 2 * self.margin
+
+        if len(self.keyframes[idx]) == 0:
+            width = 0
+            height = 0
+
         if self.title and self.title.dimensions.x > width:
             width = self.title.dimensions.x
 
-        height = yidx * self.line_height + 2 * self.margin
         self.panel.scale = (width/2,height/2,1)
         self.panel.location=(width/2,- height/2,-0.05)
 
@@ -283,6 +295,9 @@ class Goal:
             elif type(e) is Delete:
                 assert(self.cursor + e.length <= len(self.objs))
                 self.objs = self.objs[:self.cursor] + self.objs[self.cursor + e.length:]
+            elif type(e) is DeleteAll:
+                self.objs = []
+                self.cursor = 0
             elif type(e) is Cut:
                 assert(self.cursor + e.length <= len(self.objs))
                 self.clipboard.append(self.objs[self.cursor:self.cursor + e.length])
@@ -342,7 +357,6 @@ print(a2.to_text())
 a2.apply_edits(edits)
 print(a2.to_text())
 
-
 edits2 = [MoveCursor(2), Delete(3), Insert("f (x + (t - x))")]
 a2.apply_edits(edits2)
 print(a2.to_text())
@@ -362,6 +376,9 @@ a2.apply_edits([])
 a2.apply_edits([MoveCursor(11), Delete(1), Insert("=")])
 print(a2.to_text())
 
+a2.apply_edits([])
+a2.apply_edits([DeleteAll()])
+print(a2.to_text())
 
 a2.set_keyframe(0, 30)
 a2.set_keyframe(1, 60)
@@ -372,12 +389,14 @@ a2.set_keyframe(5, 180)
 a2.set_keyframe(6, 210)
 a2.set_keyframe(7, 240)
 a2.set_keyframe(8, 270)
+a2.set_keyframe(9, 300)
+a2.set_keyframe(10, 330)
 
-bpy.context.scene.frame_set(270)
+bpy.context.scene.frame_set(300)
 a2.panel_border_material.diffuse_color = PANEL_BORDER_COLOR
-a2.panel_border_material.keyframe_insert(data_path="diffuse_color", index=-1, frame=270)
-bpy.context.scene.frame_set(285)
+a2.panel_border_material.keyframe_insert(data_path="diffuse_color", index=-1, frame=300)
+bpy.context.scene.frame_set(330)
 a2.panel_border_material.diffuse_color = PANEL_BORDER_PROVED_COLOR
-a2.panel_border_material.keyframe_insert(data_path="diffuse_color", index=-1, frame=285)
+a2.panel_border_material.keyframe_insert(data_path="diffuse_color", index=-1, frame=330)
 
 common.set_camera_view()
