@@ -104,7 +104,7 @@ if "Cube" in bpy.data.objects:
     bpy.ops.object.delete()
 
 #FONTPATH = "/home/dwrensha/fonts/DejaVuSansCondensed.ttf"
-MONOFONTPATH = "/home/dwrensha/fonts/DejaVuSansMono.ttf"
+MONOFONTPATH = "/home/dwrensha/fonts/JuliaMono-Regular.ttf"
 MONOFONT = bpy.data.fonts.load(MONOFONTPATH)
 
 PANEL_MATERIAL = bpy.data.materials.new(name="Panel")
