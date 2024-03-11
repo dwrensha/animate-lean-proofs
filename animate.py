@@ -260,6 +260,16 @@ class Goal:
         if center_camera:
             self.center_camera(frame)
 
+    def appear(self, frame):
+        if frame > 0:
+            bpy.context.scene.frame_set(frame - 1)
+            self.top.scale = (0,0,0)
+            self.top.keyframe_insert(data_path="scale", index=-1, frame= frame - 1)
+
+        bpy.context.scene.frame_set(frame)
+        self.top.scale = (1,1,1)
+        self.top.keyframe_insert(data_path="scale", index=-1, frame= frame)
+
     def new_char_obj(self, c):
         if c.isspace():
             cobj = None
@@ -380,23 +390,24 @@ a2.apply_edits([])
 a2.apply_edits([DeleteAll()])
 print(a2.to_text())
 
-a2.set_keyframe(0, 30)
-a2.set_keyframe(1, 60)
-a2.set_keyframe(2, 90)
-a2.set_keyframe(3, 120)
-a2.set_keyframe(4, 150)
-a2.set_keyframe(5, 180)
-a2.set_keyframe(6, 210)
-a2.set_keyframe(7, 240)
-a2.set_keyframe(8, 270)
-a2.set_keyframe(9, 300)
-a2.set_keyframe(10, 330)
+a2.appear(30)
+a2.set_keyframe(0, 60)
+a2.set_keyframe(1, 90)
+a2.set_keyframe(2, 120)
+a2.set_keyframe(3, 150)
+a2.set_keyframe(4, 180)
+a2.set_keyframe(5, 210)
+a2.set_keyframe(6, 240)
+a2.set_keyframe(7, 270)
+a2.set_keyframe(8, 300)
+a2.set_keyframe(9, 330)
+a2.set_keyframe(10, 360)
 
-bpy.context.scene.frame_set(300)
-a2.panel_border_material.diffuse_color = PANEL_BORDER_COLOR
-a2.panel_border_material.keyframe_insert(data_path="diffuse_color", index=-1, frame=300)
 bpy.context.scene.frame_set(330)
-a2.panel_border_material.diffuse_color = PANEL_BORDER_PROVED_COLOR
+a2.panel_border_material.diffuse_color = PANEL_BORDER_COLOR
 a2.panel_border_material.keyframe_insert(data_path="diffuse_color", index=-1, frame=330)
+bpy.context.scene.frame_set(360)
+a2.panel_border_material.diffuse_color = PANEL_BORDER_PROVED_COLOR
+a2.panel_border_material.keyframe_insert(data_path="diffuse_color", index=-1, frame=360)
 
 common.set_camera_view()
