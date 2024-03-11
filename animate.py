@@ -89,6 +89,8 @@ FPS = 60
 bpy.context.scene.render.resolution_x = RESOLUTION_X
 bpy.context.scene.render.resolution_y = RESOLUTION_Y
 bpy.context.scene.render.fps = FPS
+bpy.context.scene.frame_start = 0
+bpy.context.scene.frame_end = 300
 
 CAMERA = bpy.data.objects["Camera"]
 CAMERA.data.type = "ORTHO"
@@ -349,6 +351,11 @@ a2.apply_edits([])
 edits4 = [MoveCursor(-23), Delete(13), Insert("t * f x - x * f x")]
 a2.apply_edits(edits4)
 
+a2.apply_edits([])
+a2.apply_edits([MoveCursor(11), Delete(1), Insert("=")])
+print(a2.to_text())
+
+
 a2.set_keyframe(0, 30)
 a2.center_camera(30)
 a2.set_keyframe(1, 60)
@@ -363,5 +370,9 @@ a2.set_keyframe(5, 180)
 a2.center_camera(180)
 a2.set_keyframe(6, 210)
 a2.center_camera(210)
+a2.set_keyframe(7, 240)
+a2.center_camera(240)
+a2.set_keyframe(8, 270)
+a2.center_camera(270)
 
 common.set_camera_view()
