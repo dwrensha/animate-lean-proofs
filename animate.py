@@ -112,8 +112,8 @@ MONOFONT = bpy.data.fonts.load(MONOFONTPATH)
 PANEL_MATERIAL = bpy.data.materials.new(name="Panel")
 PANEL_MATERIAL.diffuse_color = (0.012, 0.045, 0.117, 1)
 
-PANEL_BORDER_MATERIAL = bpy.data.materials.new(name="PanelBorder")
-PANEL_BORDER_MATERIAL.diffuse_color = (0.005, 0.02, 0.05, 1)
+PANEL_BORDER_COLOR = (0.005, 0.02, 0.05, 1)
+PANEL_BORDER_PROVED_COLOR = (0.005, 0.4, 0.1, 1)
 
 TEXT_MATERIAL = bpy.data.materials.new(name="TextMaterial")
 TEXT_MATERIAL.diffuse_color = (1, 1, 1, 1)
@@ -161,10 +161,13 @@ class Goal:
             self.title_height = 0
             self.title = None
 
+        self.panel_border_material = bpy.data.materials.new(name="PanelBorder")
+        self.panel_border_material.diffuse_color = PANEL_BORDER_COLOR
+
         bpy.ops.mesh.primitive_plane_add()
         self.panel_border = bpy.context.object
         self.panel_border.parent = self.top
-        self.panel_border.data.materials.append(PANEL_BORDER_MATERIAL)
+        self.panel_border.data.materials.append(self.panel_border_material)
 
         bpy.ops.object.empty_add(
             location=(self.margin, -self.margin - self.title_height, 0))
