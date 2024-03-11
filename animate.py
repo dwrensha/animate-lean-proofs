@@ -214,6 +214,9 @@ class Goal:
             xidx += 1
 
         width = max_row_idx * self.char_width + 2 * self.margin
+        if self.title and self.title.dimensions.x > width:
+            width = self.title.dimensions.x
+
         height = yidx * self.line_height + 2 * self.margin
         self.panel.scale = (width/2,height/2,1)
         self.panel.location=(width/2,- height/2,-0.05)
