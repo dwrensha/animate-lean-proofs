@@ -279,6 +279,16 @@ class Goal:
         self.top.scale = (0,0,0)
         self.top.keyframe_insert(data_path="scale", index=-1, frame= end_frame)
 
+    def fade_border_color(self, start_frame, end_frame, start_color, end_color):
+        bpy.context.scene.frame_set(start_frame)
+        self.panel_border_material.diffuse_color = start_color
+        self.panel_border_material.keyframe_insert(
+            data_path="diffuse_color", index=-1, frame=start_frame)
+        bpy.context.scene.frame_set(end_frame)
+        self.panel_border_material.diffuse_color = PANEL_BORDER_PROVED_COLOR
+        self.panel_border_material.keyframe_insert(
+            data_path="diffuse_color", index=-1, frame=end_frame)
+
     def new_char_obj(self, c):
         if c.isspace():
             cobj = None
@@ -415,12 +425,7 @@ a2.set_keyframe(9, 330)
 a2.set_keyframe(10, 360)
 a2.set_keyframe(11, 390)
 
-bpy.context.scene.frame_set(360)
-a2.panel_border_material.diffuse_color = PANEL_BORDER_COLOR
-a2.panel_border_material.keyframe_insert(data_path="diffuse_color", index=-1, frame=360)
-bpy.context.scene.frame_set(390)
-a2.panel_border_material.diffuse_color = PANEL_BORDER_PROVED_COLOR
-a2.panel_border_material.keyframe_insert(data_path="diffuse_color", index=-1, frame=390)
+a2.fade_border_color(360, 390, PANEL_BORDER_COLOR, PANEL_BORDER_PROVED_COLOR)
 
 a2.set_keyframe(11, 420)
 
