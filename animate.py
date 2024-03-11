@@ -202,7 +202,6 @@ class Goal:
         self.keyframes = [self.objs]
 
     def center_camera(self, frame):
-        bpy.context.scene.frame_set(frame)
         dims = self.panel_border.dimensions
         center = self.panel_border.matrix_world.translation
         CAMERA.location = (center.x, center.y, 1)
@@ -249,7 +248,6 @@ class Goal:
 
 
     def set_keyframe(self, idx, frame, center_camera=True):
-        bpy.context.scene.frame_set(frame)
         self.lay_out(idx)
         for obj in self.all_objs:
             if obj.obj:
@@ -264,29 +262,23 @@ class Goal:
 
     def appear(self, frame):
         if frame > 0:
-            bpy.context.scene.frame_set(frame - 1)
             self.top.scale = (0,0,0)
             self.top.keyframe_insert(data_path="scale", index=-1, frame= frame - 1)
 
-        bpy.context.scene.frame_set(frame)
         self.top.scale = (1,1,1)
         self.top.keyframe_insert(data_path="scale", index=-1, frame= frame)
 
     def shrink_to_nothing(self, start_frame, end_frame):
-        bpy.context.scene.frame_set(start_frame)
         self.top.scale = (1,1,1)
         self.top.keyframe_insert(data_path="scale", index=-1, frame= start_frame)
 
-        bpy.context.scene.frame_set(end_frame)
         self.top.scale = (0,0,0)
         self.top.keyframe_insert(data_path="scale", index=-1, frame= end_frame)
 
     def fade_border_color(self, start_frame, end_frame, start_color, end_color):
-        bpy.context.scene.frame_set(start_frame)
         self.panel_border_material.diffuse_color = start_color
         self.panel_border_material.keyframe_insert(
             data_path="diffuse_color", index=-1, frame=start_frame)
-        bpy.context.scene.frame_set(end_frame)
         self.panel_border_material.diffuse_color = PANEL_BORDER_PROVED_COLOR
         self.panel_border_material.keyframe_insert(
             data_path="diffuse_color", index=-1, frame=end_frame)
