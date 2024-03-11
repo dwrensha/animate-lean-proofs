@@ -231,7 +231,7 @@ class Goal:
         self.panel_border.location=(width/2 + self.margin,-border_height / 2,-0.06)
 
 
-    def set_keyframe(self, idx, frame):
+    def set_keyframe(self, idx, frame, center_camera=True):
         bpy.context.scene.frame_set(frame)
         self.lay_out(idx)
         for obj in self.all_objs:
@@ -242,6 +242,8 @@ class Goal:
         self.panel.keyframe_insert(data_path="location", index=-1, frame=frame)
         self.panel_border.keyframe_insert(data_path="scale", index=-1, frame=frame)
         self.panel_border.keyframe_insert(data_path="location", index=-1, frame=frame)
+        if center_camera:
+            self.center_camera(frame)
 
     def new_char_obj(self, c):
         if c.isspace():
@@ -327,7 +329,7 @@ hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 
 a1 = Goal(math1, title="Main Goal")
 a1.apply_edits([])
-a1.center_camera(0)
+a1.set_keyframe(1, 0)
 
 a2 = Goal(math2,
           title="have hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)",
@@ -360,22 +362,13 @@ print(a2.to_text())
 
 
 a2.set_keyframe(0, 30)
-a2.center_camera(30)
 a2.set_keyframe(1, 60)
-a2.center_camera(60)
 a2.set_keyframe(2, 90)
-a2.center_camera(90)
 a2.set_keyframe(3, 120)
-a2.center_camera(120)
 a2.set_keyframe(4, 150)
-a2.center_camera(150)
 a2.set_keyframe(5, 180)
-a2.center_camera(180)
 a2.set_keyframe(6, 210)
-a2.center_camera(210)
 a2.set_keyframe(7, 240)
-a2.center_camera(240)
 a2.set_keyframe(8, 270)
-a2.center_camera(270)
 
 common.set_camera_view()
