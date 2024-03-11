@@ -270,6 +270,15 @@ class Goal:
         self.top.scale = (1,1,1)
         self.top.keyframe_insert(data_path="scale", index=-1, frame= frame)
 
+    def shrink_to_nothing(self, start_frame, end_frame):
+        bpy.context.scene.frame_set(start_frame)
+        self.top.scale = (1,1,1)
+        self.top.keyframe_insert(data_path="scale", index=-1, frame= start_frame)
+
+        bpy.context.scene.frame_set(end_frame)
+        self.top.scale = (0,0,0)
+        self.top.keyframe_insert(data_path="scale", index=-1, frame= end_frame)
+
     def new_char_obj(self, c):
         if c.isspace():
             cobj = None
@@ -418,5 +427,7 @@ a2.set_keyframe(11, 420)
 
 a1.set_keyframe(1, 420, center_camera = False)
 a1.set_keyframe(2, 450)
+
+a2.shrink_to_nothing(420, 450)
 
 common.set_camera_view()
