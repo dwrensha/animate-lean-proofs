@@ -373,4 +373,11 @@ a2.set_keyframe(6, 210)
 a2.set_keyframe(7, 240)
 a2.set_keyframe(8, 270)
 
+bpy.context.scene.frame_set(270)
+a2.panel_border_material.diffuse_color = PANEL_BORDER_COLOR
+a2.panel_border_material.keyframe_insert(data_path="diffuse_color", index=-1, frame=270)
+bpy.context.scene.frame_set(285)
+a2.panel_border_material.diffuse_color = PANEL_BORDER_PROVED_COLOR
+a2.panel_border_material.keyframe_insert(data_path="diffuse_color", index=-1, frame=285)
+
 common.set_camera_view()
