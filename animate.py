@@ -322,8 +322,7 @@ math2_ = apply_edits(edits, math2)
 assert(math2_ == math3)
 
 math4="""f : ℝ → ℝ
-hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
-hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
+hf : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 ⊢ ∀ x ≤ 0, f x = 0
 """
 
@@ -332,7 +331,7 @@ a1.apply_edits([])
 a1.set_keyframe(1, 0)
 
 a2 = Goal(math2,
-          title="have hxt : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)",
+          title="replace hf : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)",
           #title="have hxt",
           location=(0,-6,0))
 #a3 = Goal(math3, location=(0,-12,0))
