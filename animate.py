@@ -369,7 +369,7 @@ hf : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 
 a1 = Goal(math1, title="Main Goal")
 a1.apply_edits([])
-a1.apply_edits([MoveCursor(10), Delete(47), Insert("∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)")])
+a1.apply_edits([MoveCursor(15), Delete(42), Insert("∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)")])
 
 a1.set_keyframe(1, 0)
 
