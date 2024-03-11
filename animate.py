@@ -97,7 +97,7 @@ bpy.context.scene.render.resolution_x = RESOLUTION_X
 bpy.context.scene.render.resolution_y = RESOLUTION_Y
 bpy.context.scene.render.fps = FPS
 bpy.context.scene.frame_start = 0
-bpy.context.scene.frame_end = 400
+bpy.context.scene.frame_end = 500
 
 CAMERA = bpy.data.objects["Camera"]
 CAMERA.data.type = "ORTHO"
@@ -356,17 +356,19 @@ hf : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 
 a1 = Goal(math1, title="Main Goal")
 a1.apply_edits([])
+a1.apply_edits([MoveCursor(10), Delete(47), Insert("∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)")])
+
 a1.set_keyframe(1, 0)
 
 a2 = Goal(math2,
           title="replace hf : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)",
-          #title="have hxt",
           location=(0,-6,0))
 #a3 = Goal(math3, location=(0,-12,0))
 print(a2.to_text())
 a2.apply_edits(edits)
 print(a2.to_text())
 
+a2.apply_edits([])
 edits2 = [MoveCursor(2), Delete(3), Insert("f (x + (t - x))")]
 a2.apply_edits(edits2)
 print(a2.to_text())
@@ -402,12 +404,19 @@ a2.set_keyframe(7, 270)
 a2.set_keyframe(8, 300)
 a2.set_keyframe(9, 330)
 a2.set_keyframe(10, 360)
+a2.set_keyframe(11, 390)
 
-bpy.context.scene.frame_set(330)
-a2.panel_border_material.diffuse_color = PANEL_BORDER_COLOR
-a2.panel_border_material.keyframe_insert(data_path="diffuse_color", index=-1, frame=330)
 bpy.context.scene.frame_set(360)
-a2.panel_border_material.diffuse_color = PANEL_BORDER_PROVED_COLOR
+a2.panel_border_material.diffuse_color = PANEL_BORDER_COLOR
 a2.panel_border_material.keyframe_insert(data_path="diffuse_color", index=-1, frame=360)
+bpy.context.scene.frame_set(390)
+a2.panel_border_material.diffuse_color = PANEL_BORDER_PROVED_COLOR
+a2.panel_border_material.keyframe_insert(data_path="diffuse_color", index=-1, frame=390)
+
+a2.set_keyframe(11, 420)
+
+
+a1.set_keyframe(1, 420, center_camera = False)
+a1.set_keyframe(2, 450)
 
 common.set_camera_view()
