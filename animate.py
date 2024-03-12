@@ -98,7 +98,7 @@ bpy.context.scene.render.resolution_x = RESOLUTION_X
 bpy.context.scene.render.resolution_y = RESOLUTION_Y
 bpy.context.scene.render.fps = FPS
 bpy.context.scene.frame_start = 0
-bpy.context.scene.frame_end = 500
+bpy.context.scene.frame_end = 1000
 
 CAMERA = bpy.data.objects["Camera"]
 CAMERA.data.type = "ORTHO"
@@ -415,18 +415,13 @@ edits = [MoveCursor(63), Cut(7), MoveCursor(-3), Delete(6),
 math2_ = apply_edits(edits, math2)
 assert(math2_ == math3)
 
-math4="""f : ℝ → ℝ
-hf : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
-⊢ ∀ x ≤ 0, f x = 0
-"""
-
 a1 = Goal(math1, title="Main Goal")
 a1.add_edits(30, [])
 
 a2 = Goal(math2,
           title="replace hf : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)",
           start_frame=a1.latest_frame(),
-          location=(0,-6,0))
+          location=(0,-5,0))
 a2.appear(a1.latest_frame())
 print(a2.to_text())
 a2.add_edits(30, [])
@@ -466,5 +461,17 @@ a1.add_edits(
     30,
     [MoveCursor(15), Delete(42), Insert("∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)")])
 
+a1.add_edits(30, [])
+a1.add_edits(30, [])
 
-#a3 = Goal(math3, location=(0,-12,0))
+math4="""f : ℝ → ℝ
+hf : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
+⊢ ∀ (a b : ℝ), a * f a + b * f b ≤ 2 * f a * f b
+"""
+
+
+a4 = Goal(math4,
+          title = "have hab : ∀ a b, a * f a + b * f b ≤ 2 * f a * f b",
+          start_frame = a1.latest_frame(),
+          location=(0,-5,0))
+a4.appear(a1.latest_frame())
