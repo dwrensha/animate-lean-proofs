@@ -98,7 +98,6 @@ bpy.context.scene.render.resolution_x = RESOLUTION_X
 bpy.context.scene.render.resolution_y = RESOLUTION_Y
 bpy.context.scene.render.fps = FPS
 bpy.context.scene.frame_start = 0
-bpy.context.scene.frame_end = 10000
 
 CAMERA = bpy.data.objects["Camera"]
 CAMERA.data.type = "ORTHO"
@@ -354,6 +353,9 @@ class Goal:
         gs.start_frame = self.latest_frame()
         gs.end_frame = gs.start_frame + duration
 
+        if gs.end_frame > bpy.context.scene.frame_end:
+            bpy.context.scene.frame_end = gs.end_frame
+
         clipboard = []
         for e in edits:
             if type(e) is MoveCursor:
@@ -475,5 +477,3 @@ a3 = Goal(math3,
           location=(0,-5,0))
 a3.appear(a1.latest_frame())
 a3.wait(30)
-
-bpy.context.scene.frame_end = a3.latest_frame()
