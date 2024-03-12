@@ -148,8 +148,8 @@ def get_font_dimensions():
     return dims
 
 @dataclass
-class Keyframe:
-    # CharObjs that are displayed in this frame
+class GoalStep:
+    # CharObjs that are displayed in this step
     objs: list[CharObj] = field(default_factory=list)
 
     cursor: int = 0
@@ -212,16 +212,16 @@ class Goal:
         self.panel.parent = self.inner
         self.panel.data.materials.append(PANEL_MATERIAL)
 
-        kf = Keyframe()
-        kf.start_frame = start_frame
-        kf.end_frame = start_frame
+        gs = GoalStep()
+        gs.start_frame = start_frame
+        gs.end_frame = start_frame
         for c in string:
             obj = self.new_char_obj(c)
-            kf.objs.append(obj)
+            gs.objs.append(obj)
             #kj.new_objs.append(obj)
 
-        self.keyframes = [kf]
-        self.set_keyframe(kf)
+        self.keyframes = [gs]
+        self.set_keyframe(gs)
 
     def latest_frame(self):
         if len(self.keyframes) > 0:
@@ -235,20 +235,16 @@ class Goal:
     def center_camera(self, frame):
         dims = self.panel_border.dimensions
         center = self.panel_border.matrix_world.translation
-        print("dims = ", dims)
-        print("center = ", center)
-        print("frame = ", frame)
         CAMERA.location = (center.x, center.y, 1)
         CAMERA.keyframe_insert(data_path="location", index=-1, frame=frame)
         CAMERA.data.ortho_scale = dims.x * 1.2
         CAMERA.data.keyframe_insert(data_path="ortho_scale", index=-1, frame=frame)
 
-    def lay_out(self, kf):
-        print("lay_out")
+    def lay_out(self, gs):
         xidx = 0
         yidx = 0
         max_row_idx = 0
-        for obj in kf.objs:
+        for obj in gs.objs:
             if obj.c == "\n":
                 if xidx > max_row_idx:
                     max_row_idx = xidx
@@ -263,11 +259,11 @@ class Goal:
         width = max_row_idx * self.char_width + 2 * self.margin
         height = yidx * self.line_height + 2 * self.margin
 
-        if len(kf.objs) == 0:
+        if len(gs.objs) == 0:
             width = 0
             height = 0
 
-        for obj in kf.deleted_objs:
+        for obj in gs.deleted_objs:
             if obj.obj:
                 obj.obj.scale = (0,0,0)
 
@@ -282,28 +278,28 @@ class Goal:
         self.panel_border.location=(width/2 + self.margin,-border_height / 2,-0.06)
         bpy.context.view_layer.update()
 
-    def set_keyframe(self, kf, center_camera=True):
-        self.lay_out(kf)
-        for obj in kf.new_objs:
+    def set_keyframe(self, gs, center_camera=True):
+        self.lay_out(gs)
+        for obj in gs.new_objs:
             if obj.obj:
                 obj.obj.scale = (0,0,0)
-                obj.keyframe_insert(kf.start_frame)
+                obj.keyframe_insert(gs.start_frame)
                 obj.obj.scale = (1,1,1)
 
-        for obj in kf.objs:
-            obj.keyframe_insert(kf.end_frame)
+        for obj in gs.objs:
+            obj.keyframe_insert(gs.end_frame)
 
-        for obj in kf.deleted_objs:
-            obj.keyframe_insert(kf.end_frame)
+        for obj in gs.deleted_objs:
+            obj.keyframe_insert(gs.end_frame)
 
-        self.panel.keyframe_insert(data_path="location", index=-1, frame=kf.end_frame)
-        self.panel.keyframe_insert(data_path="scale", index=-1, frame=kf.end_frame)
-        self.panel.keyframe_insert(data_path="location", index=-1, frame=kf.end_frame)
-        self.panel_border.keyframe_insert(data_path="scale", index=-1, frame=kf.end_frame)
+        self.panel.keyframe_insert(data_path="location", index=-1, frame=gs.end_frame)
+        self.panel.keyframe_insert(data_path="scale", index=-1, frame=gs.end_frame)
+        self.panel.keyframe_insert(data_path="location", index=-1, frame=gs.end_frame)
+        self.panel_border.keyframe_insert(data_path="scale", index=-1, frame=gs.end_frame)
         self.panel_border.keyframe_insert(data_path="location", index=-1,
-                                          frame=kf.end_frame)
+                                          frame=gs.end_frame)
         if center_camera:
-            self.center_camera(kf.end_frame)
+            self.center_camera(gs.end_frame)
 
     def appear(self, frame):
         if frame > 0:
@@ -347,48 +343,48 @@ class Goal:
                 (yidx * self.line_height) * -1 - self.margin,
                 0)
 
-    # duration is a keyframe count
-    def add_edits_keyframe(self, duration, edits,
-                           center_camera = True):
-        kf = Keyframe()
+    # duration is a frame count
+    def add_edits(self, duration, edits,
+                  center_camera = True):
+        gs = GoalStep()
         if len(self.keyframes) > 0:
-            kf.objs = self.keyframes[-1].objs.copy()
-            kf.cursor = self.keyframes[-1].cursor
-        kf.start_frame = self.latest_frame()
-        kf.end_frame = kf.start_frame + duration
+            gs.objs = self.keyframes[-1].objs.copy()
+            gs.cursor = self.keyframes[-1].cursor
+        gs.start_frame = self.latest_frame()
+        gs.end_frame = gs.start_frame + duration
 
         clipboard = []
         for e in edits:
             if type(e) is MoveCursor:
-                kf.cursor += e.offset
-                assert(0 <= kf.cursor)
-                assert(kf.cursor <= len(kf.objs))
+                gs.cursor += e.offset
+                assert(0 <= gs.cursor)
+                assert(gs.cursor <= len(gs.objs))
             elif type(e) is Insert:
                 for c in e.text:
-                    kf.new_objs.append(self.new_char_obj(c))
-                kf.objs = kf.objs[:kf.cursor] + kf.new_objs + kf.objs[kf.cursor:]
-                kf.cursor += len(kf.new_objs)
+                    gs.new_objs.append(self.new_char_obj(c))
+                gs.objs = gs.objs[:gs.cursor] + gs.new_objs + gs.objs[gs.cursor:]
+                gs.cursor += len(gs.new_objs)
             elif type(e) is Delete:
-                assert(kf.cursor + e.length <= len(kf.objs))
-                kf.deleted_objs = kf.objs[kf.cursor:kf.cursor + e.length]
-                kf.objs = kf.objs[:kf.cursor] + kf.objs[kf.cursor + e.length:]
+                assert(gs.cursor + e.length <= len(gs.objs))
+                gs.deleted_objs = gs.objs[gs.cursor:gs.cursor + e.length]
+                gs.objs = gs.objs[:gs.cursor] + gs.objs[gs.cursor + e.length:]
             elif type(e) is DeleteAll:
-                kf.deleted_objs = kf.objs.copy()
-                kf.objs = []
-                kf.cursor = 0
+                gs.deleted_objs = gs.objs.copy()
+                gs.objs = []
+                gs.cursor = 0
             elif type(e) is Cut:
-                assert(kf.cursor + e.length <= len(kf.objs))
-                clipboard.append(kf.objs[kf.cursor:kf.cursor + e.length])
-                kf.objs = kf.objs[:kf.cursor] + kf.objs[kf.cursor + e.length:]
+                assert(gs.cursor + e.length <= len(gs.objs))
+                clipboard.append(gs.objs[gs.cursor:gs.cursor + e.length])
+                gs.objs = gs.objs[:gs.cursor] + gs.objs[gs.cursor + e.length:]
             elif type(e) is Paste:
                 t = clipboard.pop()
-                kf.objs = kf.objs[:kf.cursor] + t + kf.objs[kf.cursor:]
-                kf.cursor += len(t)
+                gs.objs = gs.objs[:gs.cursor] + t + gs.objs[gs.cursor:]
+                gs.cursor += len(t)
             else :
                 raise Exception("unknown edit type: {}".format(e))
 
         assert(len(clipboard) == 0)
-        self.keyframes.append(kf)
+        self.keyframes.append(gs)
         self.set_keyframe(self.keyframes[-1], center_camera = center_camera)
 
     def to_text(self):
@@ -424,7 +420,7 @@ hf : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 """
 
 a1 = Goal(math1, title="Main Goal")
-a1.add_edits_keyframe(30, [])
+a1.add_edits(30, [])
 
 a2 = Goal(math2,
           title="replace hf : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)",
@@ -433,40 +429,40 @@ a2 = Goal(math2,
 a2.appear(a1.latest_frame())
 #a3 = Goal(math3, location=(0,-12,0))
 print(a2.to_text())
-a2.add_edits_keyframe(30, [])
-a2.add_edits_keyframe(30, edits)
+a2.add_edits(30, [])
+a2.add_edits(30, edits)
 #print(a2.to_text())
 
-a2.add_edits_keyframe(30, [])
-a2.add_edits_keyframe(30, [MoveCursor(2), Delete(3), Insert("f (x + (t - x))")])
+a2.add_edits(30, [])
+a2.add_edits(30, [MoveCursor(2), Delete(3), Insert("f (x + (t - x))")])
 #print(a2.to_text())
 
-a2.add_edits_keyframe(30, [])
+a2.add_edits(30, [])
 
 edits3 = [MoveCursor(-15), Delete(15), Insert("(t - x) * f x + f (f x)")]
-a2.add_edits_keyframe(30, edits3)
+a2.add_edits(30, edits3)
 #print(a2.to_text())
 
-a2.add_edits_keyframe(30, [])
+a2.add_edits(30, [])
 
 edits4 = [MoveCursor(-23), Delete(13), Insert("t * f x - x * f x")]
-a2.add_edits_keyframe(30, edits4)
+a2.add_edits(30, edits4)
 
-a2.add_edits_keyframe(30, [])
-a2.add_edits_keyframe(30, [MoveCursor(11), Delete(1), Insert("=")])
+a2.add_edits(30, [])
+a2.add_edits(30, [MoveCursor(11), Delete(1), Insert("=")])
 #print(a2.to_text())
 
-a2.add_edits_keyframe(30, [])
-a2.add_edits_keyframe(30, [DeleteAll()])
+a2.add_edits(30, [])
+a2.add_edits(30, [DeleteAll()])
 a2.fade_border_color(a2.latest_frame() - 30, a2.latest_frame(),
                      PANEL_BORDER_COLOR, PANEL_BORDER_PROVED_COLOR)
-a2.add_edits_keyframe(30, [])
+a2.add_edits(30, [])
 a2.shrink_to_nothing(a2.latest_frame(), a2.latest_frame() + 30)
 
 #print(a2.to_text())
 
-a1.add_edits_keyframe(a2.duration(), [], center_camera=False)
-a1.add_edits_keyframe(
+a1.add_edits(a2.duration(), [], center_camera=False)
+a1.add_edits(
     30,
     [MoveCursor(15), Delete(42), Insert("∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)")])
 
