@@ -98,7 +98,7 @@ bpy.context.scene.render.resolution_x = RESOLUTION_X
 bpy.context.scene.render.resolution_y = RESOLUTION_Y
 bpy.context.scene.render.fps = FPS
 bpy.context.scene.frame_start = 0
-bpy.context.scene.frame_end = 1000
+bpy.context.scene.frame_end = 10000
 
 CAMERA = bpy.data.objects["Camera"]
 CAMERA.data.type = "ORTHO"
@@ -475,3 +475,6 @@ a4 = Goal(math4,
           start_frame = a1.latest_frame(),
           location=(0,-5,0))
 a4.appear(a1.latest_frame())
+a4.add_edits(30, [])
+
+bpy.context.scene.frame_end = a4.latest_frame()
