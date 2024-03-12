@@ -221,12 +221,12 @@ class Goal:
             gs.objs.append(obj)
             #kj.new_objs.append(obj)
 
-        self.keyframes = [gs]
+        self.goalsteps = [gs]
         self.set_keyframe(gs)
 
     def latest_frame(self):
-        if len(self.keyframes) > 0:
-            return self.keyframes[-1].end_frame
+        if len(self.goalsteps) > 0:
+            return self.goalsteps[-1].end_frame
         else:
             return self.start_frame
 
@@ -348,9 +348,9 @@ class Goal:
     def add_edits(self, duration, edits,
                   center_camera = True):
         gs = GoalStep()
-        if len(self.keyframes) > 0:
-            gs.objs = self.keyframes[-1].objs.copy()
-            gs.cursor = self.keyframes[-1].cursor
+        if len(self.goalsteps) > 0:
+            gs.objs = self.goalsteps[-1].objs.copy()
+            gs.cursor = self.goalsteps[-1].cursor
         gs.start_frame = self.latest_frame()
         gs.end_frame = gs.start_frame + duration
 
@@ -385,12 +385,12 @@ class Goal:
                 raise Exception("unknown edit type: {}".format(e))
 
         assert(len(clipboard) == 0)
-        self.keyframes.append(gs)
-        self.set_keyframe(self.keyframes[-1], center_camera = center_camera)
+        self.goalsteps.append(gs)
+        self.set_keyframe(self.goalsteps[-1], center_camera = center_camera)
 
     def to_text(self):
         text = ""
-        for obj in self.keyframes[-1].objs:
+        for obj in self.goalsteps[-1].objs:
             text += obj.c
         return text
 
