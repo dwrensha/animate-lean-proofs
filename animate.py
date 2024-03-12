@@ -91,9 +91,17 @@ bpy.context.scene.cycles.dicing_rate = 0.25
 
 bpy.context.scene.render.filepath = "/tmp/out"
 
-RESOLUTION_X = 1920
-RESOLUTION_Y = 1080
-FPS = 60
+# k is a continuation to apply to envVar if it is defined
+def envDefault(envVar, defaultVal, k):
+  envVal = os.getenv(envVar)
+  if k is None:
+    return envVal or defaultVal
+  else:
+    return k(envVal) if envVal else defaultVal
+
+RESOLUTION_X = envDefault("RESOLUTION_X", 1920, int)
+RESOLUTION_Y = envDefault("RESOLUTION_Y", 1080, int)
+FPS = envDefault("FPS", 60, int)
 bpy.context.scene.render.resolution_x = RESOLUTION_X
 bpy.context.scene.render.resolution_y = RESOLUTION_Y
 bpy.context.scene.render.fps = FPS
@@ -113,7 +121,7 @@ if "Cube" in bpy.data.objects:
     bpy.context.view_layer.objects.active = bpy.data.objects['Cube']
     bpy.ops.object.delete()
 
-FONTDIR = Path.home() / "fonts"
+FONTDIR = envDefault("FONTDIR", Path.home() / "fonts", Path)
 #MONOFONTPATH = str(FONTDIR / "JuliaMono-Regular.ttf")
 MONOFONTPATH = str(FONTDIR / "DejaVuSansMono.ttf")
 MONOFONT = bpy.data.fonts.load(MONOFONTPATH)
