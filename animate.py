@@ -106,6 +106,7 @@ CAMERA.data.ortho_scale = 23
 
 CAMERA.location = (12, -1.5, 1)
 CAMERA.rotation_euler  = (0,0,0)
+common.set_camera_view()
 
 # delete the default cube
 if "Cube" in bpy.data.objects:
@@ -427,7 +428,6 @@ a2 = Goal(math2,
           start_frame=a1.latest_frame(),
           location=(0,-6,0))
 a2.appear(a1.latest_frame())
-#a3 = Goal(math3, location=(0,-12,0))
 print(a2.to_text())
 a2.add_edits(30, [])
 a2.add_edits(30, edits)
@@ -467,4 +467,4 @@ a1.add_edits(
     [MoveCursor(15), Delete(42), Insert("∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)")])
 
 
-common.set_camera_view()
+#a3 = Goal(math3, location=(0,-12,0))
