@@ -388,6 +388,9 @@ class Goal:
         self.goalsteps.append(gs)
         self.set_keyframe(self.goalsteps[-1], center_camera = center_camera)
 
+    def wait(self, duration):
+        self.add_edits(duration, [])
+
     def to_text(self):
         text = ""
         for obj in self.goalsteps[-1].objs:
@@ -416,7 +419,7 @@ math2_ = apply_edits(edits, math2)
 assert(math2_ == math3)
 
 a1 = Goal(math1, title="Main Goal")
-a1.add_edits(30, [])
+a1.wait(30)
 
 a2 = Goal(math2,
           title="replace hf : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)",
@@ -424,34 +427,34 @@ a2 = Goal(math2,
           location=(0,-5,0))
 a2.appear(a1.latest_frame())
 print(a2.to_text())
-a2.add_edits(30, [])
+a2.wait(30)
 a2.add_edits(30, edits)
 #print(a2.to_text())
 
-a2.add_edits(30, [])
+a2.wait(30)
 a2.add_edits(30, [MoveCursor(2), Delete(3), Insert("f (x + (t - x))")])
 #print(a2.to_text())
 
-a2.add_edits(30, [])
+a2.wait(30)
 
 edits3 = [MoveCursor(-15), Delete(15), Insert("(t - x) * f x + f (f x)")]
 a2.add_edits(30, edits3)
 #print(a2.to_text())
 
-a2.add_edits(30, [])
+a2.wait(30)
 
 edits4 = [MoveCursor(-23), Delete(13), Insert("t * f x - x * f x")]
 a2.add_edits(30, edits4)
 
-a2.add_edits(30, [])
+a2.wait(30)
 a2.add_edits(30, [MoveCursor(11), Delete(1), Insert("=")])
 #print(a2.to_text())
 
-a2.add_edits(30, [])
+a2.wait(30)
 a2.add_edits(30, [DeleteAll()])
 a2.fade_border_color(a2.latest_frame() - 30, a2.latest_frame(),
                      PANEL_BORDER_COLOR, PANEL_BORDER_PROVED_COLOR)
-a2.add_edits(30, [])
+a2.wait(30)
 a2.shrink_to_nothing(a2.latest_frame(), a2.latest_frame() + 30)
 
 #print(a2.to_text())
@@ -460,21 +463,19 @@ a1.add_edits(a2.duration(), [], center_camera=False)
 a1.add_edits(
     30,
     [MoveCursor(15), Delete(42), Insert("∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)")])
-
-a1.add_edits(30, [])
-a1.add_edits(30, [])
+a1.wait(30)
+a1.wait(30)
 
 math4="""f : ℝ → ℝ
 hf : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 ⊢ ∀ (a b : ℝ), a * f a + b * f b ≤ 2 * f a * f b
 """
 
-
 a4 = Goal(math4,
           title = "have hab : ∀ a b, a * f a + b * f b ≤ 2 * f a * f b",
           start_frame = a1.latest_frame(),
           location=(0,-5,0))
 a4.appear(a1.latest_frame())
-a4.add_edits(30, [])
+a4.wait(30)
 
 bpy.context.scene.frame_end = a4.latest_frame()
