@@ -88,24 +88,13 @@ use_gpu_render()
 
 bpy.context.scene.cycles.feature_set = 'EXPERIMENTAL' # for adaptive subdivision
 bpy.context.scene.cycles.dicing_rate = 0.25
+bpy.context.scene.render.filepath = common.envDefault("OUTDIR", "/tmp/out")
 
-bpy.context.scene.render.filepath = "/tmp/out"
-
-# k is a continuation to apply to envVar if it is defined
-def envDefault(envVar, defaultVal, k):
-  envVal = os.getenv(envVar)
-  if k is None:
-    return envVal or defaultVal
-  else:
-    return k(envVal) if envVal else defaultVal
-
-RESOLUTION_X = envDefault("RESOLUTION_X", 1920, int)
-RESOLUTION_Y = envDefault("RESOLUTION_Y", 1080, int)
-FPS = envDefault("FPS", 60, int)
-bpy.context.scene.render.resolution_x = RESOLUTION_X
-bpy.context.scene.render.resolution_y = RESOLUTION_Y
+FPS = common.envDefault("FPS", 60, int)
+bpy.context.scene.render.resolution_x = common.envDefault("RESOLUTION_X", 1920, int)
+bpy.context.scene.render.resolution_y = common.envDefault("RESOLUTION_Y", 1080, int)
 bpy.context.scene.render.fps = FPS
-bpy.context.scene.frame_start = 0
+bpy.context.scene.frame_start = common.envDefault("FRAME_START", 0, int)
 
 CAMERA = bpy.data.objects["Camera"]
 CAMERA.data.type = "ORTHO"
@@ -121,7 +110,7 @@ if "Cube" in bpy.data.objects:
     bpy.context.view_layer.objects.active = bpy.data.objects['Cube']
     bpy.ops.object.delete()
 
-FONTDIR = envDefault("FONTDIR", Path.home() / "fonts", Path)
+FONTDIR = common.envDefault("FONTDIR", Path.home() / "fonts", Path)
 #MONOFONTPATH = str(FONTDIR / "JuliaMono-Regular.ttf")
 MONOFONTPATH = str(FONTDIR / "DejaVuSansMono.ttf")
 MONOFONT = bpy.data.fonts.load(MONOFONTPATH)
@@ -485,3 +474,10 @@ a3 = Goal(math3,
           location=(0,-5,0))
 a3.appear(a1.latest_frame())
 a3.wait(30)
+
+if os.getenv("FRAME_END"):
+    bpy.context.scene.frame_end = int(os.getenv("FRAME_END"))
+if os.getenv("RENDER"):
+    bpy.ops.render.render(animation=True, write_still=True, use_viewport=False, layer='', scene='')
+if os.getenv("SAVETO"):
+    bpy.ops.wm.save_as_mainfile(filepath=os.getenv("SAVETO"))
