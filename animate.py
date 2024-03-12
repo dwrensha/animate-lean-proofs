@@ -407,16 +407,14 @@ hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
 ⊢ ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 """
 
-math3="""f : ℝ → ℝ
-hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
-x t : ℝ
-⊢ f t ≤ t * f x - x * f x + f (f x)
-"""
-
 edits = [MoveCursor(63), Cut(7), MoveCursor(-3), Delete(6),
          MoveCursor(-2), Paste(), Insert("\n")]
 math2_ = apply_edits(edits, math2)
-assert(math2_ == math3)
+assert(math2_ == """f : ℝ → ℝ
+hf : ∀ (x y : ℝ), f (x + y) ≤ y * f x + f (f x)
+x t : ℝ
+⊢ f t ≤ t * f x - x * f x + f (f x)
+""")
 
 a1 = Goal(math1, title="Main Goal")
 a1.wait(30)
@@ -466,16 +464,16 @@ a1.add_edits(
 a1.wait(30)
 a1.wait(30)
 
-math4="""f : ℝ → ℝ
+math3="""f : ℝ → ℝ
 hf : ∀ (x t : ℝ), f t ≤ t * f x - x * f x + f (f x)
 ⊢ ∀ (a b : ℝ), a * f a + b * f b ≤ 2 * f a * f b
 """
 
-a4 = Goal(math4,
+a3 = Goal(math3,
           title = "have hab : ∀ a b, a * f a + b * f b ≤ 2 * f a * f b",
           start_frame = a1.latest_frame(),
           location=(0,-5,0))
-a4.appear(a1.latest_frame())
-a4.wait(30)
+a3.appear(a1.latest_frame())
+a3.wait(30)
 
-bpy.context.scene.frame_end = a4.latest_frame()
+bpy.context.scene.frame_end = a3.latest_frame()
