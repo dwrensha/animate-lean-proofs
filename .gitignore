@@ -1,0 +1,7 @@
+__pycache__
+
+# Added by cargo
+
+/media
+/target
+/.lake
