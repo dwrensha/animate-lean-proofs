@@ -830,6 +830,8 @@ inductive ForcedWin : Side → Position → Prop where
    (m, p1) ∈ valid_moves p → ForcedWin p.turn p1 → ForcedWin p.turn p
 | Opponent (p : Position) :
    (∀ vm ∈ valid_moves p, ForcedWin p.turn.other vm.snd) → ForcedWin p.turn.other p
+   -- FIXME: This is wrong because it considers a stalemate to be a win for the side
+   --        who doesn't have the move.
 --------------
 
 def make_move (pos : Position) (cm : ChessMove) : Option Position :=
