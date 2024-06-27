@@ -900,6 +900,8 @@ elab_rules : tactic | `(tactic| checkmate) => withMainContext do
 end tactics
 -----
 
+-- The examples are commented out because they are very slow.
+
 /-
 theorem black_wins_back_rank :
     ForcedWin .black
