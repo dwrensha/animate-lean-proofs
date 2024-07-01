@@ -24,8 +24,4 @@ lean_exe «Animate» where
   -- Remove this line if you do not need such functionality.
   supportInterpreter := true
 
-@[default_target]
-lean_exe «string_match_demo» where
-  root := `StringMatchDemo
-
 require mathlib from git "https://github.com/leanprover-community/mathlib4" @ "v4.8.0"
