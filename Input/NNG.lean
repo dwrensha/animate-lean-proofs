@@ -12,7 +12,12 @@ macro (name := rwSeq) "rw " c:(Lean.Parser.Tactic.config)? s:Lean.Parser.Tactic.
 
 open Lean Meta Elab Elab.Tactic
 
-open private getAltNumFields in evalCases ElimApp.evalAlts.go in
+private def getAltNumFields (elimInfo : ElimInfo) (altName : Name) : TermElabM Nat := do
+  for altInfo in elimInfo.altsInfo do
+    if altInfo.name == altName then
+      return altInfo.numFields
+  throwError "unknown alternative name '{altName}'"
+
 def ElimApp.evalNames (elimInfo : ElimInfo) (alts : Array ElimApp.Alt) (withArg : Syntax)
     (numEqs := 0) (generalized : Array FVarId := #[]) (toClear : Array FVarId := #[])
     (toTag : Array (Ident × FVarId) := #[]) :
