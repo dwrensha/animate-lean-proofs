@@ -123,6 +123,13 @@ def Side.other : Side -> Side
 | white => black
 | black => white
 
+-- We store the board as a List of Lists.
+-- You might think that Array would be more efficient than List.
+-- However, as far as kernel evaluation is concerned, Array is
+-- just a wrapper of List, and additionally requires well-founded
+-- recursion in some situations:
+-- See https://leanprover.zulipchat.com/#narrow/stream/270676-lean4/topic/.60decide.60.20fails.20after.20leanprover.2Flean4.3Anightly-2024-05-11/near/449757859
+
 -- row, column.
 -- (0,0) is the upper left corner (a8)
 abbrev Squares := List (List (Option (Piece × Side)))
