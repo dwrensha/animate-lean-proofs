@@ -150,19 +150,6 @@ def Position.sideAt (p : Position) (c : Coords) : Option Side :=
 def Position.set (p : Position) (c : Coords) (s : Option (Piece × Side)) : Position :=
   { p with squares := p.squares.set c.row ((p.squares.get! c.row).set c.col s) }
 
--- size, current row, remaining cells -> gamestate
-/-def positin_from_cells_aux : Coords → Nat → List (List CellContents) → GameState
-| size, _, [] => ⟨size, ⟨0,0⟩, []⟩
-| size, currentRow, row::rows =>
-        let prevState := game_state_from_cells_aux size (currentRow + 1) rows
-        update_state_with_row currentRow row prevState
--/
-
--- size, remaining cells -> gamestate
---def position_from_squares : List (List (Option (Piece × Side))) → Position
---| size, cells => game_state_from_cells_aux size 0 cells
-
-
 def termOfSquare : Lean.TSyntax `chess_square → Lean.MacroM (Lean.TSyntax `term)
 | `(chess_square| ░░) => `(none)
 | `(chess_square| ▓▓) => `(none)
@@ -786,7 +773,7 @@ def valid_moves_from_src (pos : Position) (src : Coords)
 
 /--
 Take a bunch of moves which have Q,R,N,B moves fully disambiguated,
-and remove redundant disambiuation. TODO: actually implement this properly.
+and remove redundant disambiguation. TODO: actually implement this properly.
 Currently this just fully ambiguates, which can cause collisions.
 -/
 def ambiguate (moves : List (ChessMove × Position))
