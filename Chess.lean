@@ -125,7 +125,7 @@ def Side.other : Side -> Side
 
 -- row, column.
 -- (0,0) is the upper left corner (a8)
-abbrev Squares := Array (Array (Option (Piece × Side)))
+abbrev Squares := List (List (Option (Piece × Side)))
 
 structure Position where
   squares : Squares
@@ -133,7 +133,7 @@ structure Position where
 deriving DecidableEq, Repr, Inhabited
 
 def Position.get (p : Position) (c : Coords) : Option (Piece × Side) :=
-  p.squares[c.row]![c.col]!
+  (p.squares.get! c.row).get! c.col
 
 def Position.sideAt (p : Position) (c : Coords) : Option Side :=
   match p.get c with
@@ -141,7 +141,7 @@ def Position.sideAt (p : Position) (c : Coords) : Option Side :=
   | none => none
 
 def Position.set (p : Position) (c : Coords) (s : Option (Piece × Side)) : Position :=
-  { p with squares := p.squares.set! c.row (p.squares[c.row]!.set! c.col s) }
+  { p with squares := p.squares.set c.row ((p.squares.get! c.row).set c.col s) }
 
 -- size, current row, remaining cells -> gamestate
 /-def positin_from_cells_aux : Coords → Nat → List (List CellContents) → GameState
@@ -180,7 +180,7 @@ def termOfGameRow : Lean.TSyntax `game_row → Lean.MacroM (Lean.TSyntax `term)
       do if squares.size != 8
          then Lean.Macro.throwError "row has wrong size"
          let squares' ← Array.mapM termOfSquare squares
-         `(#[$squares',*])
+         `([$squares',*])
 | _ => Lean.Macro.throwError "unknown game row"
 
 def turnOfSquare : Lean.TSyntax `chess_square → Option Side
@@ -208,9 +208,9 @@ macro_rules
            Lean.Macro.throwError "cannot be both white's turn and black's turn"
          if whiteTurn
          then
-           `(Position.mk #[$rows',*] .white)
+           `(Position.mk [$rows',*] .white)
          else
-           `(Position.mk #[$rows',*] .black)
+           `(Position.mk [$rows',*] .black)
 
 def syntaxOfSquare (turn : Side) : (Piece × Side) →
   Lean.PrettyPrinter.Delaborator.DelabM (Lean.TSyntax `chess_square)
@@ -277,16 +277,14 @@ partial def extractRowAux : Lean.Expr → Lean.MetaM (List (Option (Piece × Sid
        dbg_trace "unrecognized constant: {other}"
        return []
 
-partial def extractRow : Lean.Expr → Lean.MetaM (Array (Option (Piece × Side)))
+partial def extractRow : Lean.Expr → Lean.MetaM (List (Option (Piece × Side)))
 | exp => do
-    if exp.getAppFn.constName!.toString ≠ "Array.mk" then
-      dbg_trace exp.getAppFn.constName!.toString
-      throwError "nope"
-    let exp' := exp.getAppArgs[1]!
-    let l ← extractRowAux exp'
-    return l.toArray
+    if exp.getAppFn.constName!.toString ≠ "List.cons" then
+      throwError "expected list: {exp.getAppFn.constName!.toString}"
+    let l ← extractRowAux exp
+    return l
 
-partial def extractRowList : Lean.Expr → Lean.MetaM (List (Array (Option (Piece × Side))))
+partial def extractRowList : Lean.Expr → Lean.MetaM (List (List (Option (Piece × Side))))
 | exp => do
   let exp':Lean.Expr ← (Lean.Meta.whnf exp)
   let f := Lean.Expr.getAppFn exp'
@@ -299,20 +297,19 @@ partial def extractRowList : Lean.Expr → Lean.MetaM (List (Array (Option (Piec
   | "List.nil" =>
        return []
   | other =>
-       dbg_trace "unrecognized constant: {other}"
-       return []
+       throwError "unrecognized constant: {other}"
 
 partial def extractPosition : Lean.Expr → Lean.MetaM Position
 | exp => do
     let exp': Lean.Expr ← Lean.Meta.reduce exp
     let positionArgs := Lean.Expr.getAppArgs exp'
-    let squaresList := positionArgs[0]!.getAppArgs[1]!
+    let squaresList := positionArgs[0]!
     let rows ← extractRowList squaresList
     let side ← match positionArgs[1]!.constName! with
                 | `Side.white => pure Side.white
                 | `Side.black => pure Side.black
                 | _ => throwError "unrecognized side"
-    return Position.mk rows.toArray side
+    return Position.mk rows side
 
 def delabGameRow : Array (Lean.TSyntax `chess_square) →
     Lean.PrettyPrinter.Delaborator.DelabM (Lean.TSyntax `game_row)
@@ -900,13 +897,6 @@ elab_rules : tactic | `(tactic| checkmate) => withMainContext do
 end tactics
 -----
 
--- Work around `decide` gettiung stuck.
--- See https://leanprover.zulipchat.com/#narrow/stream/270676-lean4/topic/.60decide.60.20fails.20after.20leanprover.2Flean4.3Anightly-2024-05-11/near/449780640
-unseal Array.isEqvAux
-
--- The examples are commented out because they are very slow.
-
-/-
 theorem black_wins_back_rank :
     ForcedWin .black
       ╔════════════════╗
@@ -921,10 +911,7 @@ theorem black_wins_back_rank :
       ╚════════════════╝ := by
   move "Re1"
   checkmate
--/
 
-
-/-
 theorem white_wins_promotion_back_rank :
     ForcedWin .white
       ╔════════════════╗
@@ -939,9 +926,7 @@ theorem white_wins_promotion_back_rank :
       ╚════════════════╝ := by
   move "c8=R"
   checkmate
--/
 
-/-
 theorem black_wins_promotion :
     ForcedWin .black
       ╔════════════════╗
@@ -956,14 +941,11 @@ theorem black_wins_promotion :
       ╚════════════════╝ := by
   move "e1=N"
   checkmate
--/
 
-/-
 /-
 Timman-Short 1990
 (from https://en.wikipedia.org/wiki/Smothered_mate)
 -/
-set_option maxHeartbeats 3000000 in
 theorem smothered_mate :
     ForcedWin .white
       ╔════════════════╗
@@ -984,7 +966,6 @@ theorem smothered_mate :
   opponent_move
   move "Nf7"
   checkmate
--/
 
 /-
 set_option maxHeartbeats 3000000 in
