@@ -900,6 +900,10 @@ elab_rules : tactic | `(tactic| checkmate) => withMainContext do
 end tactics
 -----
 
+-- Work around `decide` gettiung stuck.
+-- See https://leanprover.zulipchat.com/#narrow/stream/270676-lean4/topic/.60decide.60.20fails.20after.20leanprover.2Flean4.3Anightly-2024-05-11/near/449780640
+unseal Array.isEqvAux
+
 -- The examples are commented out because they are very slow.
 
 /-
