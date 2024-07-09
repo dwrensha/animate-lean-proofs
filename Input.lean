@@ -1,6 +1,7 @@
 import Input.Digits
 import Input.Examples
 import Input.Imo1972P3
+import Input.Imo1987P4
 import Input.Imo2011P3
 import Input.InfinitudeOfPrimes
 import Input.Maze
