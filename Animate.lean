@@ -195,6 +195,24 @@ def left_trim_lines (lines : String) (col : Nat) : String := Id.run do
 
 -- #eval left_trim_lines "a\n  bc\n   d" 2
 
+def StringSpan.union (s1 s2 : StringSpan) : StringSpan :=
+  { startPos := ⟨min s1.startPos.byteIdx s2.startPos.byteIdx⟩,
+    endPos := ⟨max s1.endPos.byteIdx s2.endPos.byteIdx⟩,
+  }
+
+def StringSpan.union_list : List StringSpan → StringSpan
+| [] => {startPos := ⟨0xffffffffffffffff⟩, endPos := ⟨0⟩}
+| s :: ss => s.union (StringSpan.union_list ss)
+
+unsafe def TacticStep.span_union : TacticStep → StringSpan
+| .node data children =>
+     let children_spans := children.map (fun c ↦ c.span_union)
+     data.tacticSpan.union (StringSpan.union_list children_spans)
+| .seq data children =>
+     let children_spans := children.map (fun c ↦ c.span_union)
+     data.tacticSpan.union (StringSpan.union_list children_spans)
+
+
 end syntax_manip
 
 section infotrees
@@ -218,7 +236,7 @@ def _root_.Lean.Elab.TacticInfo.name? (t : TacticInfo) : Option Name :=
 
 def GOAL_PP_WIDTH : Nat := 80
 
-def visitTacticInfo (ci : ContextInfo) (ti : TacticInfo)
+unsafe def visitTacticInfo (ci : ContextInfo) (ti : TacticInfo)
     (_children : PersistentArray InfoTree)
     (acc : List TacticStep) : IO (List TacticStep) := do
   let src := ci.fileMap.source
@@ -271,11 +289,7 @@ def visitTacticInfo (ci : ContextInfo) (ti : TacticInfo)
 
   let mut inners := []
   for c in acc do
-    match c with
-    | .seq data _ =>
-      inners := inners ++ [data.tacticSpan]
-      pure ()
-    | .node _ndata _ => pure ()
+    inners := inners ++ [c.span_union]
 
   let text := replace_inner_syntax src span inners
   let text := left_trim_lines text startPosition.column
@@ -287,14 +301,14 @@ def visitTacticInfo (ci : ContextInfo) (ti : TacticInfo)
              goals_before, goals_after }
   return [TacticStep.node d acc]
 
-def visitNode (ci : ContextInfo) (info : Info)
+unsafe def visitNode (ci : ContextInfo) (info : Info)
     (children : PersistentArray InfoTree)
     (acc : List TacticStep) : IO (List TacticStep) :=
   match info with
   | .ofTacticInfo ti => visitTacticInfo ci ti children acc
   | _ => pure acc
 
-partial def extractToplevelStep (tree : InfoTree) : IO TacticStep := do
+unsafe def extractToplevelStep (tree : InfoTree) : IO TacticStep := do
   let steps ← collectNodesBottomUpM (m := IO) visitNode tree
   let [step] := steps | throw <| IO.userError "got more than one toplevel step"
   return step
@@ -371,7 +385,7 @@ partial def stage3 (config : Config) (state2 : Stage2State) : IO Movie := do
            actions := rev_actions.reverse
            startGoal := state2.startGoal }
 
-partial def processCommands : Frontend.FrontendM (List (Environment × InfoState)) := do
+unsafe def processCommands : Frontend.FrontendM (List (Environment × InfoState)) := do
   let done ← Lean.Elab.Frontend.processCommand
   let st := ← get
   let infoState := st.commandState.infoState
