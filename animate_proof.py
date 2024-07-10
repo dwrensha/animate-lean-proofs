@@ -75,6 +75,13 @@ SYNTAX_CATS = {
     7 : "Token.Literal.Number.Integer",
 }
 
+def rgba_of_hex(h):
+    h = h.lstrip('#')
+    return (int(h[0:2], 16) / 255,
+            int(h[2:4], 16) / 255,
+            int(h[4:6], 16) / 255,
+            1.0)
+
 @dataclass
 class CharObj:
     c: str
@@ -518,9 +525,9 @@ class World:
         elif cat == "Token.Name.Builtin.Pseudo":
             return (1.0, 1.0, 1.0, 1.0)
         elif cat == "Token.Operator":
-            return (0.4, 0.4, 0.4, 1.0)
+            return rgba_of_hex("#ff79c6")
         elif cat == "Token.Literal.Number.Integer":
-            return (1.0, 1.0, 1.0, 1.0)
+            return rgba_of_hex("#bd93f9")
         else :
             return (1.0, 1.0, 1.0, 1.0)
 
