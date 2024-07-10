@@ -15,6 +15,9 @@ lean_lib Input
 lean_lib StringMatching
 
 @[default_target]
+lean_lib HighlightSyntax
+
+@[default_target]
 lean_lib Chess
 
 @[default_target]

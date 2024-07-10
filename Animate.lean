@@ -3,6 +3,7 @@ import Batteries.Lean.Util.Path
 import Lean.Data.Json.FromToJson
 import Mathlib.Tactic
 
+import HighlightSyntax
 import StringMatching
 
 namespace Animate
@@ -461,3 +462,18 @@ unsafe def main (args : List String) : IO Unit := do
   let cfg ← Animate.parseArgs args.toArray
 
   Animate.processFile cfg
+
+  let _ ← HighlightSyntax.assign_colors "case intro
+m : ℕ
+f : ℕ → ℕ
+hf : ∀ (n : ℕ), f (f n) = n + (2 * m + 1)
+f_inj : Function.Injective f
+A : Set ℕ := Set.univ \\ f '' Set.univ
+B : Set ℕ := f '' A
+ab_range : A ∪ B = {n | n < 2 * m + 1}
+ab_disj : Disjoint A B
+ab_card : (A ∪ B).ncard = 2 * m + 1
+ab_finite : (A ∪ B).Finite
+a_finite : A.Finite
+b_finite : B.Finite
+⊢ A.ncard + B.ncard = 2 * m + 1"
