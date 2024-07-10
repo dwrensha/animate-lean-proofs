@@ -49,9 +49,9 @@ MONOFONTPATH = str(FONTDIR / "JuliaMono-Regular.ttf")
 MONOFONT = bpy.data.fonts.load(MONOFONTPATH)
 
 # background color
-bpy.context.scene.world.color = (0.004, 0.016, 0.04)
+bpy.context.scene.world.color = (0.09, 0.15, 0.21)
 
-PANEL_COLOR = (0.004, 0.004, 0.008, 1)
+PANEL_COLOR = (0.012, 0.012, 0.01, 1)
 
 PANEL_BORDER_COLOR = (0.005, 0.02, 0.05, 1)
 PANEL_BORDER_PROVED_COLOR = (0.005, 0.4, 0.1, 1)
@@ -59,10 +59,10 @@ PANEL_BORDER_PROVED_COLOR = (0.005, 0.4, 0.1, 1)
 TEXT_MATERIAL = bpy.data.materials.new(name="TextMaterial")
 TEXT_MATERIAL.diffuse_color = (1, 1, 1, 1)
 
-FOREGROUND_PANEL_COLOR = (0.02, 0.001, 0.05,1)
+FOREGROUND_PANEL_COLOR = (0.01, 0.01, 0.01, 1)
 
-HIGHLIGHT_COLOR = (1.0, 0.75, 0.1, 1)
-HIGHLIGHT_COLOR_TRANSPARENT = (1.0, 0.75, 0.1, 0)
+HIGHLIGHT_COLOR = (1.0, 0.96, 0.3, 1)
+HIGHLIGHT_COLOR_TRANSPARENT = (1.0, 0.96, 0.3, 0)
 
 SYNTAX_CATS = {
     0 : "Token.Text",
@@ -519,11 +519,11 @@ class World:
         elif cat == "Token.Text.Whitespace":
             return (1.0, 1.0, 1.0, 1.0)
         elif cat == "Token.Keyword":
-            return (1.0, 1.0, 1.0, 1.0)
+            return rgba_of_hex("#ff79c6");
         elif cat == "Token.Name":
-            return (1.0, 1.0, 1.0, 1.0)
+            return rgba_of_hex("#f8f8f2")
         elif cat == "Token.Name.Builtin.Pseudo":
-            return (1.0, 1.0, 1.0, 1.0)
+            return rgba_of_hex("#8be9fd")
         elif cat == "Token.Operator":
             return rgba_of_hex("#ff79c6")
         elif cat == "Token.Literal.Number.Integer":
