@@ -78,10 +78,11 @@ theorem imo1987_p4 : ¬∃ f : ℕ → ℕ, ∀ n, f (f n) = n + 1987 := by
     rw [ab_range, Set.Iio_def, ←Finset.coe_range, Set.ncard_coe_Finset]
     exact Finset.card_range (2 * m + 1)
 
-  have ab_finite : (A ∪ B).Finite := by
-    rw [ab_range]; exact Set.finite_lt_nat _
-  obtain ⟨a_finite, b_finite⟩ := Set.finite_union.mp ab_finite
+  replace ab_card : A.ncard + B.ncard = 2 * m + 1 := by
+    have ab_finite : (A ∪ B).Finite := by
+      rw [ab_range]; exact Set.finite_lt_nat _
+    obtain ⟨a_finite, b_finite⟩ := Set.finite_union.mp ab_finite
+    rwa [Set.ncard_union_eq ab_disjoint a_finite b_finite] at ab_card
 
-  rw [Set.ncard_union_eq ab_disjoint a_finite b_finite] at ab_card
   rw [Set.ncard_image_of_injective _ f_injective] at ab_card
   omega
