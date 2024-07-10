@@ -126,13 +126,13 @@ deriving Lean.ToJson, Lean.FromJson
 inductive TacticStep where
 | node (data : TacticStepData)
        (children : List TacticStep)
-| seq (children : List TacticStep)
+| seq (span: StringSpan) (children : List TacticStep)
 deriving Lean.ToJson, Lean.FromJson
 
 def TacticStep.goals_before : TacticStep →  List Goal
 | .node data _ => data.goals_before
-| .seq [] => []
-| .seq (c::_) => c.goals_before
+| .seq _ [] => []
+| .seq _ (c::_) => c.goals_before
 
 --------------------
 -- stage 2: flattened map of tactic steps.
@@ -211,8 +211,8 @@ unsafe def TacticStep.span_union : TacticStep → StringSpan
 | .node data children =>
      let children_spans := children.map (fun c ↦ c.span_union)
      data.tacticSpan.union (StringSpan.union_list children_spans)
-| .seq children =>
-     StringSpan.union_list (children.map (fun c ↦ c.span_union))
+| .seq span children =>
+     span.union (StringSpan.union_list (children.map (fun c ↦ c.span_union)))
 
 
 end syntax_manip
@@ -270,7 +270,12 @@ unsafe def visitTacticInfo (ci : ContextInfo) (ti : TacticInfo)
   if let some ``Lean.Parser.Tactic.tacticSeq1Indented := ti.name?
   then
     if acc.length > 0 then
-    return [TacticStep.seq acc]
+    return [TacticStep.seq EMPTY_SPAN acc]
+
+  if let .atom _ "by" := ti.stx then
+    if acc.length > 0 then
+      return [TacticStep.seq span acc]
+    else return acc
 
   match stx.getHeadInfo? with
   | .some (.synthetic ..) =>
@@ -339,7 +344,7 @@ partial def stage2_aux (step : TacticStep) : StateM StepMap Unit := match step w
     set (sm.insert goalId ts')
   for child in children do
     stage2_aux child
-| .seq children => do
+| .seq _ children => do
   for child in children do
     stage2_aux child
 
