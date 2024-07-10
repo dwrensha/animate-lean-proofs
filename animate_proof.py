@@ -64,6 +64,17 @@ FOREGROUND_PANEL_COLOR = (0.02, 0.001, 0.05,1)
 HIGHLIGHT_COLOR = (1.0, 0.75, 0.1, 1)
 HIGHLIGHT_COLOR_TRANSPARENT = (1.0, 0.75, 0.1, 0)
 
+SYNTAX_CATS = {
+    0 : "Token.Text",
+    1 : "Token.Text",
+    2 : "Token.Text.Whitespace",
+    3 : "Token.Keyword",
+    4 : "Token.Name",
+    5 : "Token.Name.Builtin.Pseudo",
+    6 : "Token.Operator",
+    7 : "Token.Literal.Number.Integer",
+}
+
 @dataclass
 class CharObj:
     c: str
@@ -477,6 +488,16 @@ class World:
 
         bpy.app.handlers.frame_change_post.append(lambda s: self.post_frame(s))
 
+    def init(self, movie_json):
+        self.add_goal(movie_json['startGoal'])
+        actions = movie_json["actions"]
+        for action in actions:
+            self.add_action(action)
+
+        self.colors = dict()
+        for r in movie_json["highlighting"]:
+            print(r)
+
     def post_frame(self, scene):
         # TODO update self.foreground_text
         frame = bpy.context.scene.frame_current
@@ -552,7 +573,7 @@ class World:
         self.foreground_text_material.keyframe_insert(data_path="diffuse_color", index=-1, frame=self.current_frame)
 
     def add_action(self, action_json):
-        tactic_text = action["tacticText"]
+        tactic_text = action_json["tacticText"]
         camera_start_goalsteps = []
         active_gids = set()
         for gaction in action_json["goalActions"]:
@@ -711,7 +732,5 @@ world = World(action_frame_count = args.action_frame_count,
               switch_focus_frame_count = args.switch_focus_frame_count,
               foreground_ratio_y = args.foreground_ratio_y,
               post_tactic_pause_frame_count = args.post_tactic_pause_frame_count)
-world.add_goal(movie_json['startGoal'])
-actions = movie_json["actions"]
-for action in actions:
-    world.add_action(action)
+
+world.init(movie_json)

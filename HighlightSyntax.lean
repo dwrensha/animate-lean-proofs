@@ -16,7 +16,6 @@ def cat_to_color : String → Nat
 | "Token.Name.Builtin.Pseudo" => 5
 | "Token.Operator" => 6
 | "Token.Literal.Number.Integer" => 7
-
 | _ => 0
 
 
