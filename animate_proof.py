@@ -84,6 +84,7 @@ class CharObj:
         if self.obj:
             self.obj.keyframe_insert(data_path="location", index=-1, frame=frame)
             self.obj.keyframe_insert(data_path="scale", index=-1, frame=frame)
+            self.obj.data.materials[0].keyframe_insert(data_path="diffuse_color", index=-1, frame=frame)
 
 def get_font_dimensions():
     bpy.ops.object.text_add()
@@ -205,7 +206,9 @@ class Goal:
         else:
             bpy.ops.object.text_add()
             cobj = bpy.context.object
-            cobj.data.materials.append(TEXT_MATERIAL)
+            cmaterial = bpy.data.materials.new(name="CharMaterial")
+            cmaterial.diffuse_color = (1, 1, 1, 1)
+            cobj.data.materials.append(cmaterial)
             cobj.data.body = c
             cobj.data.font = MONOFONT
             bpy.ops.object.convert(target='MESH')
@@ -220,7 +223,7 @@ class Goal:
         xidx = 0
         yidx = 0
         max_row_idx = 0
-        for obj in gs.objs:
+        for (idx, obj) in enumerate(gs.objs):
             if obj.c == "\n":
                 yidx += 1
                 xidx = 0
@@ -228,6 +231,8 @@ class Goal:
             if obj.obj:
                 obj.obj.location = self.to_location(xidx, yidx)
                 obj.obj.scale = (1,1,1)
+                color = self.world.get_color_of_char(gs.goalId, idx)
+                obj.obj.data.materials[0].diffuse_color = color
             xidx += 1
             if xidx > max_row_idx:
                 max_row_idx = xidx
@@ -489,14 +494,35 @@ class World:
         bpy.app.handlers.frame_change_post.append(lambda s: self.post_frame(s))
 
     def init(self, movie_json):
+        self.colors = dict()
+        for r in movie_json["highlighting"]:
+            k = r["goalId"]
+            v = r["colors"]
+            self.colors[k] = v
+
         self.add_goal(movie_json['startGoal'])
         actions = movie_json["actions"]
         for action in actions:
             self.add_action(action)
 
-        self.colors = dict()
-        for r in movie_json["highlighting"]:
-            print(r)
+    def get_color_of_char(self, goalId, index):
+        cat = SYNTAX_CATS[self.colors[goalId][index]]
+        if cat == "Token.Text":
+            return (1.0, 1.0, 1.0, 1.0)
+        elif cat == "Token.Text.Whitespace":
+            return (1.0, 1.0, 1.0, 1.0)
+        elif cat == "Token.Keyword":
+            return (1.0, 1.0, 1.0, 1.0)
+        elif cat == "Token.Name":
+            return (1.0, 1.0, 1.0, 1.0)
+        elif cat == "Token.Name.Builtin.Pseudo":
+            return (1.0, 1.0, 1.0, 1.0)
+        elif cat == "Token.Operator":
+            return (0.4, 0.4, 0.4, 1.0)
+        elif cat == "Token.Literal.Number.Integer":
+            return (1.0, 1.0, 1.0, 1.0)
+        else :
+            return (1.0, 1.0, 1.0, 1.0)
 
     def post_frame(self, scene):
         # TODO update self.foreground_text
