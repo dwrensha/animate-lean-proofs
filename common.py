@@ -48,6 +48,7 @@ def set_render_engine_from_env(default="WORKBENCH"):
   elif v == "WORKBENCH":
     bpy.data.scenes[0].render.engine = "BLENDER_WORKBENCH"
     bpy.context.scene.display.shading.light = 'FLAT'
+    bpy.context.scene.view_settings.view_transform = 'Standard'
   else:
     raise Exception("unknown render engine " + v)
 

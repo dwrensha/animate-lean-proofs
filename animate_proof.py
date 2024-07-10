@@ -49,9 +49,9 @@ MONOFONTPATH = str(FONTDIR / "JuliaMono-Regular.ttf")
 MONOFONT = bpy.data.fonts.load(MONOFONTPATH)
 
 # background color
-bpy.context.scene.world.color = (0.004, 0.004, 0.008)
+bpy.context.scene.world.color = (0.004, 0.016, 0.04)
 
-PANEL_COLOR = (0.012, 0.045, 0.117, 1)
+PANEL_COLOR = (0.004, 0.004, 0.008, 1)
 
 PANEL_BORDER_COLOR = (0.005, 0.02, 0.05, 1)
 PANEL_BORDER_PROVED_COLOR = (0.005, 0.4, 0.1, 1)
