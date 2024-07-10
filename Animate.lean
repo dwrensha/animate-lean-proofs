@@ -126,12 +126,13 @@ deriving Lean.ToJson, Lean.FromJson
 inductive TacticStep where
 | node (data : TacticStepData)
        (children : List TacticStep)
-| seq (data : SeqData) (children : List TacticStep)
+| seq (children : List TacticStep)
 deriving Lean.ToJson, Lean.FromJson
 
 def TacticStep.goals_before : TacticStep →  List Goal
 | .node data _ => data.goals_before
-| .seq data _ => data.goals_before
+| .seq [] => []
+| .seq (c::_) => c.goals_before
 
 --------------------
 -- stage 2: flattened map of tactic steps.
@@ -200,17 +201,18 @@ def StringSpan.union (s1 s2 : StringSpan) : StringSpan :=
     endPos := ⟨max s1.endPos.byteIdx s2.endPos.byteIdx⟩,
   }
 
+def EMPTY_SPAN : StringSpan := {startPos := ⟨0xffffffffffffffff⟩, endPos := ⟨0⟩}
+
 def StringSpan.union_list : List StringSpan → StringSpan
-| [] => {startPos := ⟨0xffffffffffffffff⟩, endPos := ⟨0⟩}
+| [] => EMPTY_SPAN
 | s :: ss => s.union (StringSpan.union_list ss)
 
 unsafe def TacticStep.span_union : TacticStep → StringSpan
 | .node data children =>
      let children_spans := children.map (fun c ↦ c.span_union)
      data.tacticSpan.union (StringSpan.union_list children_spans)
-| .seq data children =>
-     let children_spans := children.map (fun c ↦ c.span_union)
-     data.tacticSpan.union (StringSpan.union_list children_spans)
+| .seq children =>
+     StringSpan.union_list (children.map (fun c ↦ c.span_union))
 
 
 end syntax_manip
@@ -241,11 +243,6 @@ unsafe def visitTacticInfo (ci : ContextInfo) (ti : TacticInfo)
     (acc : List TacticStep) : IO (List TacticStep) := do
   let src := ci.fileMap.source
   let stx := ti.stx
-  match stx.getHeadInfo? with
-  | .some (.synthetic ..) =>
-    -- Not actual concrete syntax the user wrote. Ignore.
-    return acc
-  | _ => pure ()
 
   let .some startPos := stx.getPos? | return acc
   let startPosition := ci.fileMap.toPosition startPos
@@ -270,14 +267,23 @@ unsafe def visitTacticInfo (ci : ContextInfo) (ti : TacticInfo)
     let fm ← ci.runCoreM cm
     goals_after := goals_after ++ [⟨g.name.toString, fm.pretty (width := GOAL_PP_WIDTH)⟩]
 
+  if let some ``Lean.Parser.Tactic.tacticSeq1Indented := ti.name?
+  then
+    if acc.length > 0 then
+    return [TacticStep.seq acc]
+
+  match stx.getHeadInfo? with
+  | .some (.synthetic ..) =>
+    -- Not actual concrete syntax the user wrote. Ignore.
+    return acc
+  | _ => pure ()
+
   let .some name := ti.name? | return acc
   match name with
   | `null => return acc
-  | ``Lean.Parser.Term.byTactic =>
-      return [TacticStep.seq ⟨span, goals_before, goals_after⟩ acc]
+--  | ``Lean.Parser.Term.byTactic =>
+--      return [TacticStep.seq ⟨span, goals_before, goals_after⟩ acc]
   | ``cdotTk => return acc
-  | ``Lean.Parser.Tactic.tacticSeq => return acc
-  | ``Lean.Parser.Tactic.tacticSeq1Indented =>   return acc
   | ``Lean.Parser.Tactic.induction =>
     -- `induction` inserts a weird no-op node. We ignore it.
     if goals_before == goals_after then return acc
@@ -333,7 +339,7 @@ partial def stage2_aux (step : TacticStep) : StateM StepMap Unit := match step w
     set (sm.insert goalId ts')
   for child in children do
     stage2_aux child
-| .seq _data children => do
+| .seq children => do
   for child in children do
     stage2_aux child
 
