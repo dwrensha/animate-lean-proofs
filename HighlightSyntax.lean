@@ -20,6 +20,70 @@ def cat_to_color : String → Nat
 | _ => 0
 
 
+section parse
+
+/-
+This section is a lightly adapted copy of some stuff from Lean/Data/Json/Parser.lean.
+-/
+
+open Lean.Parsec
+open Lean
+
+namespace Parse
+
+def hexChar : Parsec Nat := do
+  let c ← anyChar
+  if '0' ≤ c ∧ c ≤ '9' then
+    pure $ c.val.toNat - '0'.val.toNat
+  else if 'a' ≤ c ∧ c ≤ 'f' then
+    pure $ c.val.toNat - 'a'.val.toNat + 10
+  else if 'A' ≤ c ∧ c ≤ 'F' then
+    pure $ c.val.toNat - 'A'.val.toNat + 10
+  else
+    fail "invalid hex character"
+
+def escapedChar : Parsec Char := do
+  let c ← anyChar
+  match c with
+  | '\\' => return '\\'
+  | '"'  => return '"'
+  | '/'  => return '/'
+  | 'b'  => return '\x08'
+  | 'f'  => return '\x0c'
+  | 'n'  => return '\n'
+  | 'r'  => return '\x0d'
+  | 't'  => return '\t'
+  | 'u'  =>
+    let u1 ← hexChar; let u2 ← hexChar; let u3 ← hexChar; let u4 ← hexChar
+    return Char.ofNat $ 4096*u1 + 256*u2 + 16*u3 + u4
+  | 'x'  =>
+    let b1 ← hexChar; let b2 ← hexChar
+    return Char.ofNat $ 16*b1 + b2
+
+  | _ => fail "illegal \\u escape"
+
+partial def strCore (acc : String) : Parsec String := do
+  let c ← peek!
+  if c = '"' then -- "
+    skip
+    return acc
+  else
+    let c ← anyChar
+    if c = '\\' then
+      strCore (acc.push (← escapedChar))
+    -- as to whether c.val > 0xffff should be split up and encoded with multiple \u,
+    -- the JSON standard is not definite: both directly printing the character
+    -- and encoding it with multiple \u is allowed. we choose the former.
+    else if 0x0020 ≤ c.val ∧ c.val ≤ 0x10ffff then
+      strCore (acc.push c)
+    else
+      fail "unexpected character in string"
+
+def str : Parsec String := strCore ""
+
+end Parse
+end parse
+
 def assign_colors (s : String) : IO ColorMap := do
   -- TODO randomize? or use stdio
   let filename := "/tmp/animate-lean.txt"
@@ -42,15 +106,15 @@ def assign_colors (s : String) : IO ColorMap := do
     if line = "" then continue
     let [cat, val] := line.split (· = '\t') |
       throw (IO.userError s!"bad pygmentize output: {line}")
-    let val := (val.drop 1).dropRight 1 ++ "\""
-    match Lean.Json.Parser.str val.mkIterator with
+    let val' := (val.drop 1).dropRight 1 ++ "\""
+    match Parse.str val'.mkIterator with
     | Lean.Parsec.ParseResult.success _ v =>
       for _c in v.toList do
         result := result.push (cat_to_color cat)
         idx := idx + 1
 
     | Lean.Parsec.ParseResult.error _ err  =>
-      throw (IO.userError s!"failed to parse string: {err}")
+      throw (IO.userError s!"failed to parse string {val}: {err}")
 
   let _ := s.length
   --dbg_trace "lengths : {s.length} vs {result.size}"

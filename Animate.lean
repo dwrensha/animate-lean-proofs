@@ -79,12 +79,18 @@ structure Action where
   goalActions : List GoalAction
 deriving Lean.ToJson, Lean.FromJson
 
+structure GoalHighlighting where
+  goalId : String
+  colors : HighlightSyntax.ColorMap
+deriving Lean.ToJson, Lean.FromJson
+
 -- Result of stage 3.
 -- To be jsonified and consumed by animate.py in Blender
 structure Movie where
   theoremName : String
   startGoal : Goal
   actions: List Action
+  highlighting: Array GoalHighlighting
 deriving Lean.ToJson, Lean.FromJson
 
 ------------------
@@ -372,11 +378,17 @@ def stage3_inner (config : Config) (step : TacticStep') : GoalAction := Id.run d
 
 partial def stage3 (config : Config) (state2 : Stage2State) : IO Movie := do
   let mut rev_actions := []
+  let mut visited := Batteries.mkRBSet String Ord.compare
+  let mut colorings := #[]
   let mut currentGoals := [state2.startGoal.goalId]
   while currentGoals.length > 0 do
     let currentGoal :: rest := currentGoals | panic "impossible"
+    if visited.contains currentGoal then panic s!"re-visited goal {currentGoal}"
+    visited := visited.insert currentGoal
     let .some step :=
       state2.steps.find? currentGoal | panic s!"goal not found {currentGoal}"
+    let highlighting ← HighlightSyntax.assign_colors step.goal_before.state
+    colorings := colorings.push ⟨currentGoal, highlighting⟩
     let mut goal_actions := [stage3_inner config step]
     currentGoals := []
     for gid in rest do
@@ -395,7 +407,8 @@ partial def stage3 (config : Config) (state2 : Stage2State) : IO Movie := do
   -- TODO: verify that everything in state2 was visited.
   return { theoremName := config.const_name.toString
            actions := rev_actions.reverse
-           startGoal := state2.startGoal }
+           startGoal := state2.startGoal,
+           highlighting := colorings}
 
 unsafe def processCommands : Frontend.FrontendM (List (Environment × InfoState)) := do
   let done ← Lean.Elab.Frontend.processCommand
@@ -462,18 +475,3 @@ unsafe def main (args : List String) : IO Unit := do
   let cfg ← Animate.parseArgs args.toArray
 
   Animate.processFile cfg
-
-  let _ ← HighlightSyntax.assign_colors "case intro
-m : ℕ
-f : ℕ → ℕ
-hf : ∀ (n : ℕ), f (f n) = n + (2 * m + 1)
-f_inj : Function.Injective f
-A : Set ℕ := Set.univ \\ f '' Set.univ
-B : Set ℕ := f '' A
-ab_range : A ∪ B = {n | n < 2 * m + 1}
-ab_disj : Disjoint A B
-ab_card : (A ∪ B).ncard = 2 * m + 1
-ab_finite : (A ∪ B).Finite
-a_finite : A.Finite
-b_finite : B.Finite
-⊢ A.ncard + B.ncard = 2 * m + 1"
