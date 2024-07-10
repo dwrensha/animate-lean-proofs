@@ -35,7 +35,8 @@ theorem imo1987_p4 : ¬∃ f : ℕ → ℕ, ∀ n, f (f n) = n + 1987 := by
   have f_inj : f.Injective := by
     intro x y hxy;
     have hfx := hf x;
-    rw [hxy, hf y] at hfx
+    rw [hxy] at hfx
+    rw [hf y] at hfx
     exact Nat.add_right_cancel hfx.symm
 
   -- Let A := ℕ - f(ℕ) and B := f(A).
@@ -48,10 +49,11 @@ theorem imo1987_p4 : ¬∃ f : ℕ → ℕ, ∀ n, f (f n) = n + 1987 := by
        = Set.univ \ (f '' (f '' Set.univ)) := ?_
        _ = {n | n < 2 * m + 1} := ?_
     · -- Note that B = f(ℕ) - f(f(ℕ)).
-      simp only [B, Set.image_diff f_inj]
+      unfold_let B
+      rw [Set.image_diff f_inj]
       apply Set.eq_of_subset_of_subset
       · rintro x (hx1 | hx2) <;> aesop
-      · rintro x ⟨_hx, hx'⟩
+      · rintro x ⟨_, hx⟩
         by_cases (x ∈ A) <;> aesop
     · apply Set.eq_of_subset_of_subset
       · intro x hx
@@ -59,16 +61,16 @@ theorem imo1987_p4 : ¬∃ f : ℕ → ℕ, ∀ n, f (f n) = n + 1987 := by
         rw [Set.mem_setOf_eq]
         by_contra! H
         obtain ⟨z, hz⟩ : ∃ z, x = (2 * m + 1) + z := exists_add_of_le H
-        have hzz := hx z
-        rw [hz, hf z, add_comm] at hzz
-        exact (hzz rfl).elim
+        specialize hx z
+        rw [hz, hf z, add_comm] at hx
+        exact (hx rfl).elim
       · intro x hx
         aesop
 
   -- A and B are disjoint.
   have ab_disj : Disjoint A B := by
-    intro C hca hcb c hc
-    exact Set.not_mem_of_mem_diff (hca hc) (Set.image_subset f sdiff_le (hcb hc))
+    rw [Set.disjoint_right]
+    aesop
 
   -- But since f is injective, A and B have the
   -- same number of elements, which is impossible since {0, 1, ... , 2 * m}
