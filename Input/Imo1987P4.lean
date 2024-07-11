@@ -45,16 +45,35 @@ theorem imo1987_p4 : ¬∃ f : ℕ → ℕ, ∀ n, f (f n) = n + 1987 := by
 
   -- A ∪ B = {0, 1, ... , 2 * m}.
   have ab_range : A ∪ B = {n | n < 2 * m + 1} := by
+    -- Note that B = f(ℕ) - f(f(ℕ)).
+    have hB : B = f '' Set.univ \ f '' (f '' Set.univ) := by
+      unfold_let A B
+      exact Set.image_diff f_inj _ _
+
     calc A ∪ B
        = Set.univ \ (f '' (f '' Set.univ)) := ?_
        _ = {n | n < 2 * m + 1} := ?_
-    · -- Note that B = f(ℕ) - f(f(ℕ)).
-      unfold_let B
-      rw [Set.image_diff f_inj]
-      apply Set.eq_of_subset_of_subset
-      · rintro x (hx1 | hx2) <;> aesop
-      · rintro x ⟨_, hx⟩
-        by_cases (x ∈ A) <;> aesop
+    · apply Set.eq_of_subset_of_subset
+      · rintro x hx
+        simp only [Set.mem_diff, Set.mem_univ, true_and]
+        rw [hB] at hx
+        obtain hx1 | hx2 := hx
+        · simp only [A] at hx1
+          replace hx1 := Set.not_mem_of_mem_diff hx1
+          contrapose! hx1
+          aesop
+        · replace hx2 := Set.not_mem_of_mem_diff hx2
+          exact hx2
+      · intro x hx
+        replace hx := Set.not_mem_of_mem_diff hx
+        rw [hB]
+        rw [Set.mem_union, or_iff_not_imp_left]
+        intro hxA
+        rw [Set.mem_diff]
+        refine ⟨?_, hx⟩
+        simp only [A] at hxA
+        simp only [Set.mem_diff, Set.mem_univ, true_and, not_not] at hxA
+        exact hxA
     · apply Set.eq_of_subset_of_subset
       · intro x hx
         replace hx : ∀ (y : ℕ), ¬f (f y) = x := by aesop
@@ -65,7 +84,15 @@ theorem imo1987_p4 : ¬∃ f : ℕ → ℕ, ∀ n, f (f n) = n + 1987 := by
         rw [hz, hf z, add_comm] at hx
         exact (hx rfl).elim
       · intro x hx
-        aesop
+        simp only [Set.mem_diff, Set.mem_univ, true_and]
+        rw [Set.mem_setOf_eq] at hx
+        rintro ⟨y, ⟨z, _, hz2⟩, hzy⟩
+        specialize hf z
+        rw [hz2] at hf
+        rw [hzy] at hf
+        rw [hf] at hx
+        rw [add_lt_iff_neg_right] at hx
+        exact Nat.not_succ_le_zero z hx
 
   -- A and B are disjoint.
   have ab_disj : Disjoint A B := by

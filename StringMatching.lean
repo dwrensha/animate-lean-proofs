@@ -16,7 +16,7 @@ structure BestMatch where
 def get_hyps_start (s1 : List Char) : Nat :=
   match (s1.findIdx? (· = '\n'), s1.findIdx? (· = ':')) with
   | (none, none) => 0
-  | (none, some _) => s1.length
+  | (none, some _) => 0
   | (some n, none) => n + 1
   | (some nn, some nc) =>
       if nn < nc then nn + 1 else 0
