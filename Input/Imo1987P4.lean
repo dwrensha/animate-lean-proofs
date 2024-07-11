@@ -76,7 +76,9 @@ theorem imo1987_p4 : ¬∃ f : ℕ → ℕ, ∀ n, f (f n) = n + 1987 := by
         exact hxA
     · apply Set.eq_of_subset_of_subset
       · intro x hx
-        replace hx : ∀ (y : ℕ), ¬f (f y) = x := by aesop
+        simp only [Set.mem_diff, Set.mem_univ, true_and] at hx
+        simp only [Set.image_univ, Set.mem_image, Set.mem_range,
+                   exists_exists_eq_and, not_exists] at hx
         rw [Set.mem_setOf_eq]
         by_contra! H
         obtain ⟨z, hz⟩ : ∃ z, x = z + (2 * m + 1) := Nat.exists_eq_add_of_le' H
@@ -86,7 +88,9 @@ theorem imo1987_p4 : ¬∃ f : ℕ → ℕ, ∀ n, f (f n) = n + 1987 := by
       · intro x hx
         rw [Set.mem_setOf_eq] at hx
         simp only [Set.mem_diff, Set.mem_univ, true_and]
-        rintro ⟨y, ⟨z, _, hz2⟩, hzy⟩
+        intro hfx
+        obtain ⟨y, hz, hzy⟩ := hfx
+        obtain ⟨z, _, hz2⟩ := hz
         specialize hf z
         rw [hz2] at hf
         rw [hzy] at hf
