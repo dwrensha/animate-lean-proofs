@@ -13,9 +13,22 @@ structure BestMatch where
   start_jj : Nat
   length : Nat
 
+def get_hyps_start (s1 : List Char) : Nat :=
+  match (s1.findIdx? (· = '\n'), s1.findIdx? (· = ':')) with
+  | (none, none) => 0
+  | (none, some _) => s1.length
+  | (some n, none) => n + 1
+  | (some nn, some nc) =>
+      if nn < nc then nn + 1 else 0
+
 def get_next_best_match (s1 s2 : List Char) (im : IndexMaps) (nonmatchers : String := "")
     : BestMatch := Id.run do
   let mut best : BestMatch := ⟨0, 0, 0⟩
+
+  -- HACK
+  let s1_hyps_start := get_hyps_start s1
+  let s2_hyps_start := get_hyps_start s2
+
   for ii in [0 : s1.length] do
     for jj in [0 : s2.length] do
       let mut kk := 0
@@ -25,6 +38,10 @@ def get_next_best_match (s1 s2 : List Char) (im : IndexMaps) (nonmatchers : Stri
             im.s1_to_s2.get! (ii + kk) = none &&
             im.s2_to_s1.get! (jj + kk) = none do
         kk := kk + 1
+
+      if ii < s1_hyps_start ∧ s2_hyps_start ≤ jj
+      then continue
+
       if kk > best.length then
         best := ⟨ii, jj, kk⟩
   return best
