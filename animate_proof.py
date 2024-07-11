@@ -513,7 +513,11 @@ class World:
             self.add_action(action)
 
     def get_color_of_char(self, goalId, index):
-        cat = SYNTAX_CATS[self.colors[goalId][index]]
+        if not goalId in self.colors:
+            print("warning: goal not found in color map: {}".format(goalId))
+            cat = "Token.Text"
+        else:
+            cat = SYNTAX_CATS[self.colors[goalId][index]]
         if cat == "Token.Text":
             return (1.0, 1.0, 1.0, 1.0)
         elif cat == "Token.Text.Whitespace":

@@ -387,8 +387,7 @@ partial def stage3 (config : Config) (state2 : Stage2State) : IO Movie := do
     visited := visited.insert currentGoal
     let .some step :=
       state2.steps.find? currentGoal | panic s!"goal not found {currentGoal}"
-    let highlighting ← HighlightSyntax.assign_colors step.goal_before.state
-    colorings := colorings.push ⟨currentGoal, highlighting⟩
+    colorings := colorings.push ⟨currentGoal, ← HighlightSyntax.assign_colors step.goal_before.state⟩
     let mut goal_actions := [stage3_inner config step]
     currentGoals := []
     for gid in rest do
@@ -396,6 +395,7 @@ partial def stage3 (config : Config) (state2 : Stage2State) : IO Movie := do
         state2.steps.find? gid | panic s!"goal not found {gid}"
       if other_step.span == step.span
       then
+        colorings := colorings.push ⟨gid, ← HighlightSyntax.assign_colors other_step.goal_before.state⟩
         goal_actions := stage3_inner config other_step :: goal_actions
         currentGoals := currentGoals ++ (other_step.goals_after.map (·.goalId))
       else
