@@ -56,13 +56,13 @@ theorem imo1987_p4 : ¬∃ f : ℕ → ℕ, ∀ n, f (f n) = n + 1987 := by
     · apply Set.eq_of_subset_of_subset
       · rintro x hx
         simp only [Set.mem_diff, Set.mem_univ, true_and]
-        rw [hB] at hx
         obtain hx1 | hx2 := hx
         · simp only [A] at hx1
           replace hx1 := Set.not_mem_of_mem_diff hx1
           contrapose! hx1
           aesop
-        · replace hx2 := Set.not_mem_of_mem_diff hx2
+        · rw [hB] at hx2
+          replace hx2 := Set.not_mem_of_mem_diff hx2
           exact hx2
       · intro x hx
         replace hx := Set.not_mem_of_mem_diff hx
