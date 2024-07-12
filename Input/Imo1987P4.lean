@@ -58,29 +58,16 @@ theorem imo1987_p4 : ¬∃ f : ℕ → ℕ, ∀ n, f (f n) = n + 1987 := by
       generalize f '' X = Y at *
       generalize f '' Y = Z at *
       exact Set.diff_union_diff_cancel sub1 sub2
-    · apply Set.eq_of_subset_of_subset
-      · intro x hx
-        simp only [Set.mem_diff, Set.mem_univ, true_and] at hx
-        simp only [Set.image_univ, Set.mem_image, Set.mem_range,
-                   exists_exists_eq_and, not_exists] at hx
-        rw [Set.mem_setOf_eq]
-        by_contra! H
-        obtain ⟨z, hz⟩ : ∃ z, x = z + (2 * m + 1) := Nat.exists_eq_add_of_le' H
-        specialize hx z
-        rw [hz, hf z, add_comm] at hx
-        exact (hx rfl).elim
-      · intro x hx
-        rw [Set.mem_setOf_eq] at hx
-        simp only [Set.mem_diff, Set.mem_univ, true_and]
-        intro hfx
-        obtain ⟨y, hz, hzy⟩ := hfx
-        obtain ⟨z, _, hz2⟩ := hz
-        specialize hf z
-        rw [hz2] at hf
-        rw [hzy] at hf
-        rw [hf] at hx
-        rw [add_lt_iff_neg_right] at hx
-        exact Nat.not_succ_le_zero z hx
+    · ext x
+      rw [Set.mem_setOf_eq]
+      rw [←not_iff_not]
+      rw [←Set.compl_eq_univ_diff]
+      rw [Set.not_mem_compl_iff]
+      rw [not_lt]
+      simp only [Set.mem_image, Set.mem_univ, true_and, exists_exists_eq_and]
+      simp only [hf]
+      rw [le_iff_exists_add']
+      simp_rw [eq_comm]
 
   -- A and B are disjoint.
   have ab_disj : Disjoint A B := by
