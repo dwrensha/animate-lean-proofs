@@ -8,7 +8,7 @@ import Aesop
 import Mathlib.Data.Set.Basic
 import Mathlib.Data.Set.Card
 import Mathlib.Order.Interval.Finset.Nat
-import Mathlib.Tactic.Ring
+import Mathlib.Tactic
 
 /-!
 # International Mathematical Olympiad 1987, Problem 4
@@ -49,31 +49,15 @@ theorem imo1987_p4 : ¬∃ f : ℕ → ℕ, ∀ n, f (f n) = n + 1987 := by
        = Set.univ \ (f '' (f '' Set.univ)) := ?_
        _ = {n | n < 2 * m + 1} := ?_
     · -- Note that B = f(ℕ) - f(f(ℕ)).
-      have hB : B = f '' Set.univ \ f '' (f '' Set.univ) := by
-        unfold_let A B
-        exact Set.image_diff f_inj _ _
-
-      apply Set.eq_of_subset_of_subset
-      · rintro x hx
-        simp only [Set.mem_diff, Set.mem_univ, true_and]
-        obtain hx1 | hx2 := hx
-        · simp only [A] at hx1
-          replace hx1 := Set.not_mem_of_mem_diff hx1
-          contrapose! hx1
-          aesop
-        · rw [hB] at hx2
-          replace hx2 := Set.not_mem_of_mem_diff hx2
-          exact hx2
-      · intro x hx
-        replace hx := Set.not_mem_of_mem_diff hx
-        rw [hB]
-        rw [Set.mem_union, or_iff_not_imp_left]
-        intro hxA
-        rw [Set.mem_diff]
-        refine ⟨?_, hx⟩
-        simp only [A] at hxA
-        simp only [Set.mem_diff, Set.mem_univ, true_and, not_not] at hxA
-        exact hxA
+      unfold_let B
+      rw [Set.image_diff f_inj]
+      unfold_let A
+      have sub1 : f '' Set.univ ⊆ Set.univ := Set.subset_univ _
+      have sub2 : f '' (f '' Set.univ) ⊆ f '' Set.univ := Set.image_mono sub1
+      generalize Set.univ = X at *
+      generalize f '' X = Y at *
+      generalize f '' Y = Z at *
+      exact Set.diff_union_diff_cancel sub1 sub2
     · apply Set.eq_of_subset_of_subset
       · intro x hx
         simp only [Set.mem_diff, Set.mem_univ, true_and] at hx
