@@ -51,13 +51,9 @@ theorem imo1987_p4 : ¬∃ f : ℕ → ℕ, ∀ n, f (f n) = n + 1987 := by
     · -- Note that B = f(ℕ) - f(f(ℕ)).
       unfold_let B
       rw [Set.image_diff f_inj]
-      unfold_let A
-      have sub1 : f '' Set.univ ⊆ Set.univ := Set.subset_univ _
-      have sub2 : f '' (f '' Set.univ) ⊆ f '' Set.univ := Set.image_mono sub1
-      generalize Set.univ = X at *
-      generalize f '' X = Y at *
-      generalize f '' Y = Z at *
-      exact Set.diff_union_diff_cancel sub1 sub2
+      refine Set.diff_union_diff_cancel ?_ ?_
+      · exact Set.subset_univ _
+      · exact Set.image_mono (Set.subset_univ _)
     · ext x
       rw [Set.mem_setOf_eq]
       rw [←not_iff_not]
