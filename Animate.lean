@@ -290,15 +290,15 @@ unsafe def visitTacticInfo (ci : ContextInfo) (ti : TacticInfo)
     return acc
   | _ => pure ()
 
+  -- Tactic step is a no-op. Ignore it.
+  if goals_before == goals_after then return acc
+
   let .some name := ti.name? | return acc
   match name with
   | `null => return acc
 --  | ``Lean.Parser.Term.byTactic =>
 --      return [TacticStep.seq ⟨span, goals_before, goals_after⟩ acc]
   | ``cdotTk => return acc
-  | ``Lean.Parser.Tactic.induction =>
-    -- `induction` inserts a weird no-op node. We ignore it.
-    if goals_before == goals_after then return acc
   | ``Lean.Parser.Tactic.inductionAlt =>
     -- induction alternative. We want the direct children
     -- of `induction` to be `seq` nodes, so we collapse these.
