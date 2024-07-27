@@ -1,5 +1,7 @@
 import Mathlib.Tactic
 
+import Annotations
+
 theorem foo0 {A : Prop} : A → A := by
   intro h
   exact h
@@ -11,7 +13,7 @@ theorem foo2 (n : ℕ) : n = n := by
   have : True := True.intro
   have : True := by exact True.intro
   induction n with
-  | zero => have : True := True.intro; rfl
+  | zero => atomic(have : True := True.intro; rfl)
   | succ _ _ => rfl
 
 theorem foo3 (n : ℕ) : n = n := by

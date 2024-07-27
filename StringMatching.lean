@@ -22,6 +22,8 @@ def get_hyps_start (s1 : List Char) : Nat :=
       if nn < nc then nn + 1 else 0
 
 def get_next_best_match (s1 s2 : List Char) (im : IndexMaps) (nonmatchers : String := "")
+    (s1_reverse_order := false)
+    (s2_reverse_order := false)
     : BestMatch := Id.run do
   let mut best : BestMatch := ⟨0, 0, 0⟩
 
@@ -32,8 +34,11 @@ def get_next_best_match (s1 s2 : List Char) (im : IndexMaps) (nonmatchers : Stri
   let s1 := s1.toArray
   let s2 := s2.toArray
 
-  for ii in [0 : s1.size] do
-    for jj in [0 : s2.size] do
+  let s1range := if s1_reverse_order then (List.range s1.size).reverse else List.range s1.size
+  let s2range := if s2_reverse_order then (List.range s2.size).reverse else List.range s2.size
+
+  for ii in s1range do
+    for jj in s2range do
       let mut kk := 0
       if s1.get! (ii + kk) ∉ nonmatchers.toList then
       while ii + kk < s1.size && jj + kk < s2.size &&
@@ -53,6 +58,8 @@ def get_next_best_match (s1 s2 : List Char) (im : IndexMaps) (nonmatchers : Stri
   return best
 
 def do_match (s1 s2 : String) (min_match_len : Nat := 1) (nonmatchers : String := "")
+    (s1_reverse_order := false)
+    (s2_reverse_order := false)
     : IndexMaps := Id.run do
   let mut result := ⟨Array.mkArray s1.length none, Array.mkArray s2.length none⟩
 
@@ -68,6 +75,8 @@ def do_match (s1 s2 : String) (min_match_len : Nat := 1) (nonmatchers : String :
 
   while True do
     let m := get_next_best_match cs1 cs2 result (nonmatchers := nonmatchers)
+               (s1_reverse_order := s1_reverse_order)
+               (s2_reverse_order := s2_reverse_order)
     if m.length < min_match_len then
       return result
     for kk in [0 : m.length] do

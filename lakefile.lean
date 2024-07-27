@@ -9,6 +9,9 @@ package «animate» where
   ]
 
 @[default_target]
+lean_lib Annotations
+
+@[default_target]
 lean_lib Input
 
 @[default_target]

@@ -3,6 +3,7 @@ import Batteries.Lean.Util.Path
 import Lean.Data.Json.FromToJson
 import Mathlib.Tactic
 
+import Annotations
 import HighlightSyntax
 import StringMatching
 
@@ -122,6 +123,8 @@ structure TacticStepData where
   tacticSpan : StringSpan
   goals_before : List Goal
   goals_after : List Goal
+  reverse_s1 : Bool := false
+  reverse_s2 : Bool := false
 deriving Lean.ToJson, Lean.FromJson
 
 structure SeqData where
@@ -149,6 +152,8 @@ structure TacticStep' where
   span : StringSpan
   goal_before : Goal
   goals_after : List Goal -- include children
+  reverse_s1 : Bool := false
+  reverse_s2 : Bool := false
 deriving Lean.ToJson, Lean.FromJson
 
 /-- map from goalId to tactic step that consumes that goal.
@@ -299,6 +304,79 @@ unsafe def visitTacticInfo (ci : ContextInfo) (ti : TacticInfo)
 --  | ``Lean.Parser.Term.byTactic =>
 --      return [TacticStep.seq ⟨span, goals_before, goals_after⟩ acc]
   | ``cdotTk => return acc
+  | ``atomicTac =>
+     if let .node _ ``atomicTac #[_, _, inner, _] := ti.stx then
+       let .some span' := StringSpan.ofSyntax inner | panic! "bad atomic span"
+       let .some startPos := inner.getPos? | panic! "bad inner span"
+       let startPosition := ci.fileMap.toPosition startPos
+       let text := replace_inner_syntax src span' []
+       let text := left_trim_lines text startPosition.column
+
+       let d := { elaborator := ti.elaborator.toString
+                  name := name.toString
+                  tacticSpan := span'
+                  text
+                  goals_before, goals_after }
+       return [TacticStep.node d []]
+     else
+       panic! "bad atomic syntax"
+  | ``reverseS2Tac =>
+     if let .node _ ``reverseS2Tac #[_, _, inner, _] := ti.stx then
+       let .some span' := StringSpan.ofSyntax inner | panic! "bad reverse_s2 span"
+       let .some startPos := inner.getPos? | panic! "bad inner span"
+       let startPosition := ci.fileMap.toPosition startPos
+       let text := replace_inner_syntax src span' []
+       let text := left_trim_lines text startPosition.column
+
+       let d := { elaborator := ti.elaborator.toString
+                  name := name.toString
+                  tacticSpan := span'
+                  text
+                  reverse_s2 := true
+                  goals_before, goals_after }
+       return [TacticStep.node d []]
+     else
+       panic! "bad reverse_s2 syntax"
+
+  | ``reverseS1S2Tac =>
+     if let .node _ ``reverseS1S2Tac #[_, _, inner, _] := ti.stx then
+       let .some span' := StringSpan.ofSyntax inner | panic! "bad reverse_s1_s2 span"
+       let .some startPos := inner.getPos? | panic! "bad inner span"
+       let startPosition := ci.fileMap.toPosition startPos
+       let text := replace_inner_syntax src span' []
+       let text := left_trim_lines text startPosition.column
+
+       let d := { elaborator := ti.elaborator.toString
+                  name := name.toString
+                  tacticSpan := span'
+                  text
+                  reverse_s1 := true
+                  reverse_s2 := true
+                  goals_before, goals_after }
+       return [TacticStep.node d []]
+     else
+       panic! "bad reverse_s1_s2 syntax"
+
+
+  | ``reverseS1Tac =>
+     if let .node _ ``reverseS1Tac #[_, _, inner, _] := ti.stx then
+       let .some span' := StringSpan.ofSyntax inner | panic! "bad reverse_s1 span"
+       let .some startPos := inner.getPos? | panic! "bad inner span"
+       let startPosition := ci.fileMap.toPosition startPos
+       let text := replace_inner_syntax src span' []
+       let text := left_trim_lines text startPosition.column
+
+       let d := { elaborator := ti.elaborator.toString
+                  name := name.toString
+                  tacticSpan := span'
+                  text
+                  reverse_s1 := true
+                  goals_before, goals_after }
+       return [TacticStep.node d []]
+     else
+       panic! "bad reverse_s1 syntax"
+
+
   | ``Lean.Parser.Tactic.inductionAlt =>
     -- induction alternative. We want the direct children
     -- of `induction` to be `seq` nodes, so we collapse these.
@@ -347,7 +425,9 @@ partial def stage2_aux (step : TacticStep) : StateM StepMap Unit := match step w
     let ts' := { span,
                  goal_before := goal,
                  goals_after := goals_after.reverse,
-                 text := data.text }
+                 text := data.text,
+                 reverse_s1 := data.reverse_s1
+                 reverse_s2 := data.reverse_s2 }
     set (sm.insert goalId ts')
   for child in children do
     stage2_aux child
@@ -368,6 +448,8 @@ def stage3_inner (config : Config) (step : TacticStep') : GoalAction := Id.run d
       let im := Animate.do_match step.goal_before.state g.state
                                  (min_match_len := config.min_match_len)
                                  (nonmatchers := config.nonmatchers)
+                                 (s1_reverse_order := step.reverse_s1)
+                                 (s2_reverse_order := step.reverse_s2)
       ts_rev := {goal := g, indexMaps := im} :: ts_rev
     let ga : GoalAction := {
       startGoalId := step.goal_before.goalId
