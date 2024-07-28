@@ -509,8 +509,11 @@ class World:
 
         self.add_goal(movie_json['startGoal'])
         actions = movie_json["actions"]
+        idx = 0
         for action in actions:
+            print ("{}/{}".format(idx, len(actions)))
             self.add_action(action)
+            idx += 1
 
     def get_color_of_char(self, goalId, index):
         if not goalId in self.colors:
