@@ -2,7 +2,7 @@
 -- https://www.youtube.com/watch?v=b59fpAJ8Mfs
 -- https://leanprover.zulipchat.com/#narrow/stream/238830-Lean-for-the-curious-mathematician-2020/topic/Zoom/near/203703811
 
-import Mathlib.Data.Nat.Prime
+import Mathlib.Data.Nat.Prime.Basic
 import Mathlib.Tactic.Linarith
 
 open scoped Nat
