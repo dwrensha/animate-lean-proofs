@@ -42,6 +42,9 @@ def get_next_best_match (s1 s2 : List Char) (im : IndexMaps) (nonmatchers : Stri
       if ii < s1_hyps_start ∧ s2_hyps_start ≤ jj
       then continue
 
+      if s1_hyps_start ≤ ii ∧ jj < s2_hyps_start
+      then continue
+
       if kk > best.length then
         best := ⟨ii, jj, kk⟩
   return best
