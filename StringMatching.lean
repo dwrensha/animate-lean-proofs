@@ -29,11 +29,14 @@ def get_next_best_match (s1 s2 : List Char) (im : IndexMaps) (nonmatchers : Stri
   let s1_hyps_start := get_hyps_start s1
   let s2_hyps_start := get_hyps_start s2
 
-  for ii in [0 : s1.length] do
-    for jj in [0 : s2.length] do
+  let s1 := s1.toArray
+  let s2 := s2.toArray
+
+  for ii in [0 : s1.size] do
+    for jj in [0 : s2.size] do
       let mut kk := 0
       if s1.get! (ii + kk) ∉ nonmatchers.toList then
-      while ii + kk < s1.length && jj + kk < s2.length &&
+      while ii + kk < s1.size && jj + kk < s2.size &&
             s1.get! (ii + kk) = s2.get! (jj + kk) &&
             im.s1_to_s2.get! (ii + kk) = none &&
             im.s2_to_s1.get! (jj + kk) = none do
