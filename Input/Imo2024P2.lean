@@ -1,6 +1,6 @@
 -- This file contains a heavily cleaned up version of the
 -- solution [1] that AlphaProof produced for problem 2 on IMO 2024.
--- See the video [2] for more commentary about how this proof.
+-- See the video [2] for more commentary about this proof.
 -- See also DeepMind's announcement blog post [3].
 --
 -- [1] https://storage.googleapis.com/deepmind-media/DeepMind.com/Blog/imo-2024-solutions/P2/index.html
