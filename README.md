@@ -1,8 +1,22 @@
 # Animate Lean Proofs
 
-Code from [this video](https://youtu.be/KuxFWwwlEtc).
+This is a tool that accepts as input any Lean 4 theorem,
+and produces as output a Blender animation showing
+the steps of the proof smoothly evolving in sequence.
+
+[This video](https://youtu.be/KuxFWwwlEtc) provides some more background
+and shows some examples.
 
 [<img src="http://img.youtube.com/vi/KuxFWwwlEtc/maxresdefault.jpg" height="240px">](http://youtu.be/KuxFWwwlEtc)
+
+## more examples
+
+|  |  |
+| ----- | ---- |
+| IMO 2024 Problem 2 | [<img src="http://img.youtube.com/vi/5IARsdn78xE/maxresdefault.jpg" height="120px">](https://youtu.be/5IARsdn78xE)|
+
+| IMO 1987 Problem 4 | [<img src="http://img.youtube.com/vi/gi8ZTjRO-xI/maxresdefault.jpg" height="120px">](https://youtu.be/gi8ZTjRO-xI)|
+
 
 ## setup
 
