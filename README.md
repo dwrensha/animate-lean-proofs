@@ -13,9 +13,8 @@ and shows some examples.
 
 |  |  |
 | ----- | ---- |
-| IMO 2024 Problem 2 | [<img src="http://img.youtube.com/vi/5IARsdn78xE/maxresdefault.jpg" height="120px">](https://youtu.be/5IARsdn78xE)|
-
-| IMO 1987 Problem 4 | [<img src="http://img.youtube.com/vi/gi8ZTjRO-xI/maxresdefault.jpg" height="120px">](https://youtu.be/gi8ZTjRO-xI)|
+| [IMO 2024 Problem 2](https://youtu.be/5IARsdn78xE) | [<img src="http://img.youtube.com/vi/5IARsdn78xE/maxresdefault.jpg" height="120px">](https://youtu.be/5IARsdn78xE)|
+| [IMO 1987 Problem 4](https://youtu.be/gi8ZTjRO-xI) | [<img src="http://img.youtube.com/vi/gi8ZTjRO-xI/maxresdefault.jpg" height="120px">](https://youtu.be/gi8ZTjRO-xI)|
 
 
 ## setup
