@@ -1,6 +1,8 @@
 import Lean
 import Mathlib.Data.List.Basic
 import Mathlib.Tactic.CasesM
+import ChessWidget
+import Lean.Data.Json.FromToJson
 
 declare_syntax_cat chess_square
 declare_syntax_cat horizontal_border
@@ -112,12 +114,12 @@ inductive Piece where
 | rook : Piece
 | queen : Piece
 | king : Piece
-deriving DecidableEq, Repr
+deriving DecidableEq, Repr, Lean.ToJson, Lean.FromJson
 
 inductive Side where
 | white : Side
 | black : Side
-deriving DecidableEq, Repr, Inhabited
+deriving DecidableEq, Repr, Inhabited, Lean.ToJson, Lean.FromJson
 
 def Side.other : Side -> Side
 | white => black
@@ -137,7 +139,7 @@ abbrev Squares := List (List (Option (Piece × Side)))
 structure Position where
   squares : Squares
   turn : Side
-deriving DecidableEq, Repr, Inhabited
+deriving DecidableEq, Repr, Inhabited,  Lean.ToJson, Lean.FromJson
 
 def Position.get (p : Position) (c : Coords) : Option (Piece × Side) :=
   (p.squares.get! c.row).get! c.col
@@ -338,6 +340,10 @@ def delabPosition : Lean.Expr → Lean.PrettyPrinter.Delaborator.Delab
   let e' ← Lean.Meta.reduce e
   delabPosition e'
 
+structure ChessPositionWidgetProps where
+  pos? : Option Position := none
+  deriving Lean.Server.RpcEncodable
+
 def game_start :=
   ╔════════════════╗
   ║♜]♞]♝]♛]♚]♝]♞]♜]║
@@ -369,6 +375,8 @@ def pos2 :=  ╔════════════════╗
 -- end (d)elab, start analysis
 
 -----------------------------------------------
+set_option linter.hashCommand false
+#widget ChessPositionWidget with { pos? := pos2 : ChessPositionWidgetProps }
 
 def row_to_rank (row : Nat) : Char := Char.ofNat ((8 - row) + (Char.toNat '0'))
 def col_to_file (col : Nat) : Char := Char.ofNat (col + (Char.toNat 'a'))

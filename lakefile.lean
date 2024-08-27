@@ -24,6 +24,9 @@ lean_lib HighlightSyntax
 lean_lib Chess
 
 @[default_target]
+lean_lib ChessWidget
+
+@[default_target]
 lean_exe «Animate» where
   -- Enables the use of the Lean interpreter by the executable (e.g.,
   -- `runFrontend`) at the expense of increased binary size on Linux.
