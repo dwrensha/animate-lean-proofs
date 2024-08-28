@@ -343,6 +343,62 @@ def delabPosition : Lean.Expr → Lean.PrettyPrinter.Delaborator.Delab
 structure ChessPositionWidgetProps where
   pos? : Option Position := none
   deriving Lean.Server.RpcEncodable
+/- Parsing Forsyth–Edwards Notation (FEN) -/
+def parsePiece : Char → Option (Piece × Side)
+| 'p' => some (Piece.pawn, Side.black)
+| 'n' => some (Piece.knight, Side.black)
+| 'b' => some (Piece.bishop, Side.black)
+| 'r' => some (Piece.rook, Side.black)
+| 'q' => some (Piece.queen, Side.black)
+| 'k' => some (Piece.king, Side.black)
+| 'P' => some (Piece.pawn, Side.white)
+| 'N' => some (Piece.knight, Side.white)
+| 'B' => some (Piece.bishop, Side.white)
+| 'R' => some (Piece.rook, Side.white)
+| 'Q' => some (Piece.queen, Side.white)
+| 'K' => some (Piece.king, Side.white)
+| _ => none
+
+def parseFenRow (row : String) : List (Option (Piece × Side)) :=
+  row.foldl (fun acc c =>
+    if c.isDigit then
+      let n := c.toNat - '0'.toNat
+      acc ++ List.replicate n none
+    else
+      acc ++ [parsePiece c]
+  ) []
+
+def parseFenBoard (board : List String) : Squares :=
+  board.map parseFenRow
+
+def parseSideToMove (s : String) : Side :=
+  match s with
+  | "w" => Side.white
+  | "b" => Side.black
+  | _ => Side.white  -- Defaulting to white in case of error
+
+def positionFromFEN (fen : String) : Option Position :=
+  let parts := fen.splitOn " "
+  match parts with
+  | boardStr :: sideToMoveStr :: _ =>
+      let boardRows := boardStr.splitOn "/"
+      if boardRows.length = 8 then
+        let board := parseFenBoard boardRows
+        let sideToMove := parseSideToMove sideToMoveStr
+        -- TODO: Add parsing for
+        -- castling, en passant, halfmove clock and fullmove number.
+        some { squares := board, turn := sideToMove }
+      else
+        none
+  | _ => none
+
+-- Example usage:
+def my_pos := (positionFromFEN "r3k2r/pp2bppp/2n1pn2/q1bpN3/2B5/4P3/PPP2PPP/RNBQ1RK1 w kq - 4 10").get!
+
+#reduce my_pos
+
+set_option linter.hashCommand false
+#widget ChessPositionWidget with { pos? := my_pos : ChessPositionWidgetProps }
 
 def game_start :=
   ╔════════════════╗
