@@ -509,7 +509,7 @@ class World:
 
         self.add_goal(movie_json['startGoal'])
         actions = movie_json["actions"]
-        idx = 0
+        idx = 1
         for action in actions:
             print ("{}/{}".format(idx, len(actions)))
             self.add_action(action)
