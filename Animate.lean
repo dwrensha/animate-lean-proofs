@@ -1,5 +1,4 @@
 import Lean
-import Batteries.Lean.Util.Path
 import Lean.Data.Json.FromToJson
 import Mathlib.Tactic
 

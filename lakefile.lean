@@ -33,4 +33,4 @@ lean_exe «Animate» where
   -- Remove this line if you do not need such functionality.
   supportInterpreter := true
 
-require mathlib from git "https://github.com/leanprover-community/mathlib4" @ "v4.10.0"
+require mathlib from git "https://github.com/leanprover-community/mathlib4" @ "v4.11.0"
