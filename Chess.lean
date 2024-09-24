@@ -343,6 +343,7 @@ def delabPosition : Lean.Expr → Lean.PrettyPrinter.Delaborator.Delab
 structure ChessPositionWidgetProps where
   pos? : Option Position := none
   deriving Lean.Server.RpcEncodable
+
 /- Parsing Forsyth–Edwards Notation (FEN) -/
 def parsePiece : Char → Option (Piece × Side)
 | 'p' => some (Piece.pawn, Side.black)
@@ -377,7 +378,7 @@ def parseSideToMove (s : String) : Side :=
   | "b" => Side.black
   | _ => Side.white  -- Defaulting to white in case of error
 
-def positionFromFEN (fen : String) : Option Position :=
+def positionFromFen (fen : String) : Option Position :=
   let parts := fen.splitOn " "
   match parts with
   | boardStr :: sideToMoveStr :: _ =>
@@ -392,10 +393,61 @@ def positionFromFEN (fen : String) : Option Position :=
         none
   | _ => none
 
+def pieceToFenChar : Piece × Side → Char
+| (Piece.pawn, Side.white) => 'P'
+| (Piece.knight, Side.white) => 'N'
+| (Piece.bishop, Side.white) => 'B'
+| (Piece.rook, Side.white) => 'R'
+| (Piece.queen, Side.white) => 'Q'
+| (Piece.king, Side.white) => 'K'
+| (Piece.pawn, Side.black) => 'p'
+| (Piece.knight, Side.black) => 'n'
+| (Piece.bishop, Side.black) => 'b'
+| (Piece.rook, Side.black) => 'r'
+| (Piece.queen, Side.black) => 'q'
+| (Piece.king, Side.black) => 'k'
+
+def fenRowFromSquares (row : List (Option (Piece × Side))) : String :=
+  let rec aux (squares : List (Option (Piece × Side))) (acc : String)
+      (emptyCount : Nat) : String :=
+    match squares with
+    | [] =>
+        if emptyCount > 0 then
+          acc ++ toString emptyCount
+        else
+          acc
+    | (some piece) :: rest =>
+        let acc' := if emptyCount > 0 then acc ++ toString emptyCount else acc
+        let c := pieceToFenChar piece
+        aux rest (acc' ++ c.toString) 0
+    | none :: rest =>
+        aux rest acc (emptyCount + 1)
+  aux row "" 0
+
+def fenFromPosition (pos : Position) : String :=
+  let boardRows := pos.squares
+  let fenRows := boardRows.map fenRowFromSquares
+  let fenBoard := String.intercalate "/" fenRows
+  let sideToMove := match pos.turn with
+                    | Side.white => "w"
+                    | Side.black => "b"
+  -- TODO: handle the following fields
+  let castling := "-"
+  let enPassant := "-"
+  let halfmoveClock := "0"
+  let fullmoveNumber := "0"
+  fenBoard ++ " " ++ sideToMove ++ " " ++ castling ++ " " ++ enPassant ++ " " ++ halfmoveClock ++ " " ++ fullmoveNumber
+
 -- Example usage:
-def my_pos := (positionFromFEN "r3k2r/pp2bppp/2n1pn2/q1bpN3/2B5/4P3/PPP2PPP/RNBQ1RK1 w kq - 4 10").get!
+def my_pos := (positionFromFen "r3k2r/pp2bppp/2n1pn2/q1bpN3/2B5/4P3/PPP2PPP/RNBQ1RK1 w kq - 4 10").get!
 
 #reduce my_pos
+
+#eval fenFromPosition my_pos
+
+#eval positionFromFen (fenFromPosition my_pos) == some my_pos
+
+
 
 set_option linter.hashCommand false
 #widget ChessPositionWidget with { pos? := my_pos : ChessPositionWidgetProps }
