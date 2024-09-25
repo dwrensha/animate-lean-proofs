@@ -38,7 +38,7 @@ def get_side {p : _root_.Position} {side : Side} (_: ForcedWin side p) : Side :=
 #check get_side Chess.morphy_mates_in_two == Side.white
 
 set_option linter.hashCommand false
-#widget ChessPositionWidget with { pos? := get_pos Chess.morphy_mates_in_two : ChessPositionWidgetProps }
+#widget ChessPositionWidget with { position? := some <| get_pos Chess.morphy_mates_in_two : ChessPositionWidgetProps }
 
 #check ChessPositionWidget
 
@@ -75,7 +75,7 @@ def forced_win_rpc (props : PanelWidgetProps) : RequestM (RequestTask Html) :=
               -- Try to interpret `posExpr` as a `Position`
               let posVal ← unsafe (evalExpr _root_.Position (mkConst ``_root_.Position) posExpr)
               -- Create props for the ChessPositionWidget
-              let widgetProps : ChessPositionWidgetProps := { pos? := some posVal }
+              let widgetProps : ChessPositionWidgetProps := { position? := some posVal }
               let board_html := Html.ofComponent ChessPositionWidget widgetProps #[]
               let fen_str := fenFromPosition posVal
               let fen_html := <span>{Html.text fen_str}</span>
@@ -112,4 +112,4 @@ theorem Chess.morphy_mates_in_two' :
       move "Rd8"
       checkmate
 
-#widget ChessPositionWidget with { pos? := get_pos Chess.morphy_mates_in_two : ChessPositionWidgetProps }
+#widget ChessPositionWidget with { position? := get_pos Chess.morphy_mates_in_two : ChessPositionWidgetProps }

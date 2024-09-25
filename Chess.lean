@@ -346,7 +346,7 @@ def delabPosition : Lean.Expr → Lean.PrettyPrinter.Delaborator.Delab
   delabPosition e'
 
 structure ChessPositionWidgetProps where
-  pos? : Option Position := none
+  position? : Option Position := none
   deriving Lean.Server.RpcEncodable
 
 open ProofWidgets
@@ -374,7 +374,7 @@ function getSquareColor(row, col) {
 export default function ChessPositionWidget(props) {
   const emptyBoard = Array(8).fill(Array(8).fill(null));
 
-  const { turn = 'nobody', squares = emptyBoard } = props.pos || {};
+  const { turn = 'nobody', squares = emptyBoard } = props.position || {};
 
   const chessBoardStyle = {
     display: 'flex',
@@ -540,7 +540,7 @@ def my_pos := (positionFromFen "r3k2r/pp2bppp/2n1pn2/q1bpN3/2B5/4P3/PPP2PPP/RNBQ
 
 
 set_option linter.hashCommand false
-#widget ChessPositionWidget with { pos? := some my_pos : ChessPositionWidgetProps }
+#widget ChessPositionWidget with { position? := some my_pos : ChessPositionWidgetProps }
 
 def game_start :=
   ╔════════════════╗
@@ -574,7 +574,7 @@ def pos2 :=  ╔════════════════╗
 
 -----------------------------------------------
 set_option linter.hashCommand false
-#widget ChessPositionWidget with { pos? := pos2 : ChessPositionWidgetProps }
+#widget ChessPositionWidget with { position? := pos2 : ChessPositionWidgetProps }
 
 def row_to_rank (row : Nat) : Char := Char.ofNat ((8 - row) + (Char.toNat '0'))
 def col_to_file (col : Nat) : Char := Char.ofNat (col + (Char.toNat 'a'))
