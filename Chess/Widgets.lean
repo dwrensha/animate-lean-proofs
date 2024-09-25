@@ -1,46 +1,108 @@
-import Chess
-import ProofWidgets.Component.Panel.SelectionPanel
+import Chess.Basic
+import Chess.Fen
+import ProofWidgets.Component.Basic
+import ProofWidgets.Data.Html
 import ProofWidgets.Component.PenroseDiagram
 import ProofWidgets.Component.Panel.Basic
-import ProofWidgets.Presentation.Expr
-import ProofWidgets.Component.HtmlDisplay
 
 /-! ## Example use of string diagram widgets -/
 
-open ProofWidgets Lean Meta Elab
 
-#check ForcedWin
+structure ChessPositionWidgetProps where
+  position? : Option Position := none
+  deriving Lean.Server.RpcEncodable
 
-theorem Chess.morphy_mates_in_two :
-    ForcedWin .white
-      ╔════════════════╗
-      ║░░▓▓░░▓▓♚]♝]░░♜]║
-      ║♟]░░▓▓♞]▓▓♟]♟]♟]║
-      ║░░▓▓░░▓▓♛]▓▓░░▓▓║
-      ║▓▓░░▓▓░░♟]░░♗]░░║
-      ║░░▓▓░░▓▓♙]▓▓░░▓▓║
-      ║▓▓♕]▓▓░░▓▓░░▓▓░░║
-      ║♙]♙]♙]▓▓░░♙]♙]♙]║
-      ║▓▓░░♔}♖]▓▓░░▓▓░░║
-      ╚════════════════╝ := by
-    move "Qb8"
-    opponent_move
-    move "Rd8"
-    checkmate
+open ProofWidgets
 
-#check Chess.morphy_mates_in_two
+@[widget]
+def ChessPositionWidget : Component ChessPositionWidgetProps where
+  javascript := "
+import * as React from 'react';
+// Mapping of piece names to symbols
+const pieceSymbols = {
+  'pawn': '♟',
+  'rook': '♜',
+  'knight': '♞',
+  'bishop': '♝',
+  'queen': '♛',
+  'king': '♚'
+};
+
+// Helper function to determine the square color
+function getSquareColor(row, col) {
+  return (row + col) % 2 === 0 ? '#b58863' : '#f0d9b5';
+}
+
+// Chessboard component with inline styles
+export default function ChessPositionWidget(props) {
+  const emptyBoard = Array(8).fill(Array(8).fill(null));
+
+  const { turn = 'nobody', squares = emptyBoard } = props.position || {};
+
+  const chessBoardStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+  };
+
+  const chessRowStyle = {
+    display: 'flex',
+  };
+
+  const chessSquareStyle = {
+    width: '40px',
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  };
+
+  const chessPieceStyle = (color) => ({
+    fontSize: '40px',
+    color: color === 'white' ? '#fff' : '#000',
+  });
+
+  const rows = squares.map((row, rowIndex) => {
+    const columns = row.map((square, colIndex) => {
+      const squareColor = getSquareColor(rowIndex, colIndex);
+      const piece = square ? pieceSymbols[square[0]] : null;
+      const pieceColor = square ? square[1] : null;
+
+      return React.createElement(
+        'div',
+        {
+          key: `${rowIndex}-${colIndex}`,
+          style: { ...chessSquareStyle, backgroundColor: squareColor },
+        },
+        React.createElement(
+          'span',
+          { style: chessPieceStyle(pieceColor) },
+          piece
+        )
+      );
+    });
+
+    return React.createElement(
+      'div',
+      { key: `row-${rowIndex}`, style: chessRowStyle },
+      columns
+    );
+  });
+
+  return React.createElement(
+    'div',
+    {},
+    React.createElement('h3', {}, `Turn: ${turn}`),
+    React.createElement('div', { style: chessBoardStyle }, rows)
+  );
+}
+"
+
+
+open Lean Meta Elab
 
 def get_pos {p : _root_.Position} {side : Side} (_: ForcedWin side p) : _root_.Position := p
 
 def get_side {p : _root_.Position} {side : Side} (_: ForcedWin side p) : Side := side
-
-#check get_pos Chess.morphy_mates_in_two
-#check get_side Chess.morphy_mates_in_two == Side.white
-
-set_option linter.hashCommand false
-#widget ChessPositionWidget with { position? := some <| get_pos Chess.morphy_mates_in_two : ChessPositionWidgetProps }
-
-#check ChessPositionWidget
 
 open ProofWidgets Penrose DiagramBuilderM Lean.Server
 
@@ -92,24 +154,3 @@ end Chess
 def ForcedWinWidget :  Component PanelWidgetProps  :=
     mk_rpc_widget% Chess.forced_win_rpc
 syntax (name := forcedWinWidget) "#forced_win_widget " term : command
-open Command
-
-theorem Chess.morphy_mates_in_two' :
-    ForcedWin .white
-      ╔════════════════╗
-      ║░░▓▓░░▓▓♚]♝]░░♜]║
-      ║♟]░░▓▓♞]▓▓♟]♟]♟]║
-      ║░░▓▓░░▓▓♛]▓▓░░▓▓║
-      ║▓▓░░▓▓░░♟]░░♗]░░║
-      ║░░▓▓░░▓▓♙]▓▓░░▓▓║
-      ║▓▓♕]▓▓░░▓▓░░▓▓░░║
-      ║♙]♙]♙]▓▓░░♙]♙]♙]║
-      ║▓▓░░♔}♖]▓▓░░▓▓░░║
-      ╚════════════════╝ := by
-    with_panel_widgets [ForcedWinWidget]
-      move "Qb8"
-      opponent_move
-      move "Rd8"
-      checkmate
-
-#widget ChessPositionWidget with { position? := get_pos Chess.morphy_mates_in_two : ChessPositionWidgetProps }
