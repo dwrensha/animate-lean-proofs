@@ -1,8 +1,13 @@
 import Lean
 import Mathlib.Data.List.Basic
 import Mathlib.Tactic.CasesM
-import ChessWidget
 import Lean.Data.Json.FromToJson
+import ProofWidgets.Component.Panel.SelectionPanel
+import ProofWidgets.Component.PenroseDiagram
+import ProofWidgets.Component.Panel.Basic
+import ProofWidgets.Presentation.Expr
+import ProofWidgets.Component.HtmlDisplay
+
 
 declare_syntax_cat chess_square
 declare_syntax_cat horizontal_border
@@ -344,6 +349,91 @@ structure ChessPositionWidgetProps where
   pos? : Option Position := none
   deriving Lean.Server.RpcEncodable
 
+open ProofWidgets
+
+@[widget]
+def ChessPositionWidget : Component ChessPositionWidgetProps where
+  javascript := "
+import * as React from 'react';
+// Mapping of piece names to symbols
+const pieceSymbols = {
+  'pawn': '♟',
+  'rook': '♜',
+  'knight': '♞',
+  'bishop': '♝',
+  'queen': '♛',
+  'king': '♚'
+};
+
+// Helper function to determine the square color
+function getSquareColor(row, col) {
+  return (row + col) % 2 === 0 ? '#b58863' : '#f0d9b5';
+}
+
+// Chessboard component with inline styles
+export default function ChessPositionWidget(props) {
+  const emptyBoard = Array(8).fill(Array(8).fill(null));
+
+  const { turn = 'nobody', squares = emptyBoard } = props.pos || {};
+
+  const chessBoardStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+  };
+
+  const chessRowStyle = {
+    display: 'flex',
+  };
+
+  const chessSquareStyle = {
+    width: '40px',
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  };
+
+  const chessPieceStyle = (color) => ({
+    fontSize: '40px',
+    color: color === 'white' ? '#fff' : '#000',
+  });
+
+  const rows = squares.map((row, rowIndex) => {
+    const columns = row.map((square, colIndex) => {
+      const squareColor = getSquareColor(rowIndex, colIndex);
+      const piece = square ? pieceSymbols[square[0]] : null;
+      const pieceColor = square ? square[1] : null;
+
+      return React.createElement(
+        'div',
+        {
+          key: `${rowIndex}-${colIndex}`,
+          style: { ...chessSquareStyle, backgroundColor: squareColor },
+        },
+        React.createElement(
+          'span',
+          { style: chessPieceStyle(pieceColor) },
+          piece
+        )
+      );
+    });
+
+    return React.createElement(
+      'div',
+      { key: `row-${rowIndex}`, style: chessRowStyle },
+      columns
+    );
+  });
+
+  return React.createElement(
+    'div',
+    {},
+    React.createElement('h3', {}, `Turn: ${turn}`),
+    React.createElement('div', { style: chessBoardStyle }, rows)
+  );
+}
+"
+
 /- Parsing Forsyth–Edwards Notation (FEN) -/
 def parsePiece : Char → Option (Piece × Side)
 | 'p' => some (Piece.pawn, Side.black)
@@ -450,7 +540,7 @@ def my_pos := (positionFromFen "r3k2r/pp2bppp/2n1pn2/q1bpN3/2B5/4P3/PPP2PPP/RNBQ
 
 
 set_option linter.hashCommand false
-#widget ChessPositionWidget with { pos? := my_pos : ChessPositionWidgetProps }
+#widget ChessPositionWidget with { pos? := some my_pos : ChessPositionWidgetProps }
 
 def game_start :=
   ╔════════════════╗
