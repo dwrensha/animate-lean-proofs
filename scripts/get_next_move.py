@@ -12,20 +12,17 @@ VENV_DIR = os.path.join(SCRIPT_DIR, 'venv')
 def create_virtualenv(venv_path):
     """Creates a virtual environment if it doesn't exist."""
     if not os.path.isdir(venv_path):
-        print("Creating virtual environment...")
         venv.create(venv_path, with_pip=True)
-        print(f"Virtual environment created at {venv_path}")
 
 def install_package(venv_path, package):
     """Installs a package in the virtual environment using pip."""
     pip_executable = os.path.join(venv_path, 'bin', 'pip')
     # Check if the package is already installed
     try:
-        subprocess.check_call([pip_executable, 'show', package], stdout=subprocess.DEVNULL)
+        subprocess.check_call([pip_executable, 'show', package], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError:
-        # Package is not installed; install it
-        print(f"Installing {package} in the virtual environment...")
-        subprocess.check_call([pip_executable, 'install', package])
+        # Package is not installed; install it silently
+        subprocess.check_call([pip_executable, 'install', package], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def is_running_in_venv():
     """Checks if the script is already running inside the virtual environment."""
