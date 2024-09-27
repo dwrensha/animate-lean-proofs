@@ -1,5 +1,9 @@
 __pycache__
 
+# virtual environment for the guess_next_move Tactic
+
+/scripts/venv
+
 # Added by cargo
 
 /media
