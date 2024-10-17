@@ -159,7 +159,7 @@ deriving Lean.ToJson, Lean.FromJson
     That should be the latest, most specific step
     that lists the goal in its before state but not in its after state.
 -/
-abbrev StepMap := Batteries.HashMap String TacticStep'
+abbrev StepMap := Std.HashMap String TacticStep'
 
 structure Stage2State where
   startGoal : Goal
@@ -467,13 +467,13 @@ partial def stage3 (config : Config) (state2 : Stage2State) : IO Movie := do
     if visited.contains currentGoal then panic s!"re-visited goal {currentGoal}"
     visited := visited.insert currentGoal
     let .some step :=
-      state2.steps.find? currentGoal | panic s!"goal not found {currentGoal}"
+      state2.steps.get? currentGoal | panic s!"goal not found {currentGoal}"
     colorings := colorings.push ⟨currentGoal, ← HighlightSyntax.assign_colors step.goal_before.state⟩
     let mut goal_actions := [stage3_inner config step]
     currentGoals := []
     for gid in rest do
       let .some other_step :=
-        state2.steps.find? gid | panic s!"goal not found {gid}"
+        state2.steps.get? gid | panic s!"goal not found {gid}"
       if other_step.span == step.span
       then
         colorings := colorings.push ⟨gid, ← HighlightSyntax.assign_colors other_step.goal_before.state⟩
