@@ -7,8 +7,8 @@ namespace NNG
 section tactics
 
 -- make `rw` mean `rewrite`, so that it does not autmatically close goals with `rfl`.
-macro (name := rwSeq) "rw " c:(Lean.Parser.Tactic.config)? s:Lean.Parser.Tactic.rwRuleSeq l:(Lean.Parser.Tactic.location)? : tactic =>
-    `(tactic| (rewrite $(c)? $s $(l)?))
+macro (name := rwSeq) "rw " c:Lean.Parser.Tactic.optConfig s:Lean.Parser.Tactic.rwRuleSeq l:(Lean.Parser.Tactic.location)? : tactic => do
+    `(tactic| (rewrite $c $s:rwRuleSeq $(l)?))
 
 open Lean Meta Elab Elab.Tactic
 

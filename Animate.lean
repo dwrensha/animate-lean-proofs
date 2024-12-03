@@ -237,7 +237,7 @@ def collectNodesBottomUpM {α : Type} {m : Type → Type} [Monad m]
     (i : InfoTree) : m (List α) := do
   let x ← i.visitM
    (m := m)
-   (postNode := fun ci i cs as => p ci i cs (as.filterMap id).join)
+   (postNode := fun ci i cs as => p ci i cs (as.filterMap id).flatten)
   let y := x.getD []
   return y
 
