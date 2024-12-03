@@ -1,4 +1,5 @@
 import Lean
+import Std.Internal.Parsec
 
 namespace HighlightSyntax
 
@@ -25,13 +26,12 @@ section parse
 This section is a lightly adapted copy of some stuff from Lean/Data/Json/Parser.lean.
 -/
 
-open Lean.Parsec
 open Lean
 
 namespace Parse
 
-def hexChar : Parsec Nat := do
-  let c ← anyChar
+def hexChar : Std.Internal.Parsec String.Iterator Nat := do
+  let c ← Std.Internal.Parsec.any
   if '0' ≤ c ∧ c ≤ '9' then
     pure $ c.val.toNat - '0'.val.toNat
   else if 'a' ≤ c ∧ c ≤ 'f' then
@@ -39,10 +39,10 @@ def hexChar : Parsec Nat := do
   else if 'A' ≤ c ∧ c ≤ 'F' then
     pure $ c.val.toNat - 'A'.val.toNat + 10
   else
-    fail "invalid hex character"
+    Std.Internal.Parsec.fail "invalid hex character"
 
-def escapedChar : Parsec Char := do
-  let c ← anyChar
+def escapedChar : Std.Internal.Parsec String.Iterator Char := do
+  let c ← Std.Internal.Parsec.any
   match c with
   | '\\' => return '\\'
   | '"'  => return '"'
@@ -59,15 +59,15 @@ def escapedChar : Parsec Char := do
     let b1 ← hexChar; let b2 ← hexChar
     return Char.ofNat $ 16*b1 + b2
 
-  | _ => fail "illegal \\u escape"
+  | _ => Std.Internal.Parsec.fail "illegal \\u escape"
 
-partial def strCore (acc : String) : Parsec String := do
-  let c ← peek!
+partial def strCore (acc : String) : Std.Internal.Parsec String.Iterator String := do
+  let c ← Std.Internal.Parsec.peek!
   if c = '"' then -- "
-    skip
+    Std.Internal.Parsec.skip
     return acc
   else
-    let c ← anyChar
+    let c ← Std.Internal.Parsec.any
     if c = '\\' then
       strCore (acc.push (← escapedChar))
     -- as to whether c.val > 0xffff should be split up and encoded with multiple \u,
@@ -76,9 +76,9 @@ partial def strCore (acc : String) : Parsec String := do
     else if 0x0020 ≤ c.val ∧ c.val ≤ 0x10ffff then
       strCore (acc.push c)
     else
-      fail "unexpected character in string"
+      Std.Internal.Parsec.fail "unexpected character in string"
 
-def str : Parsec String := strCore ""
+def str : Std.Internal.Parsec String.Iterator String := strCore ""
 
 end Parse
 end parse
@@ -107,12 +107,12 @@ def assign_colors (s : String) : IO ColorMap := do
       throw (IO.userError s!"bad pygmentize output: {line}")
     let val' := (val.drop 1).dropRight 1 ++ "\""
     match Parse.str val'.mkIterator with
-    | Lean.Parsec.ParseResult.success _ v =>
+    | Std.Internal.Parsec.ParseResult.success _ v =>
       for _c in v.toList do
         result := result.push (cat_to_color cat)
         idx := idx + 1
 
-    | Lean.Parsec.ParseResult.error _ err  =>
+    | Std.Internal.Parsec.ParseResult.error _ err  =>
       throw (IO.userError s!"failed to parse string {val}: {err}")
 
   let _ := s.length
