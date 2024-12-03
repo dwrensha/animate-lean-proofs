@@ -6,7 +6,7 @@ namespace NNG
 
 section tactics
 
--- make `rw` mean `rewrite`, so that it does not autmatically close goals with `rfl`.
+-- Make `rw` mean `rewrite`, so that it does not automatically close goals with `rfl`.
 macro (name := rwSeq) "rw " c:Lean.Parser.Tactic.optConfig s:Lean.Parser.Tactic.rwRuleSeq l:(Lean.Parser.Tactic.location)? : tactic => do
     `(tactic| (rewrite $c $s:rwRuleSeq $(l)?))
 
