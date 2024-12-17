@@ -14,6 +14,7 @@ import common
 
 common.set_render_engine_from_env()
 bpy.context.scene.render.image_settings.file_format = 'FFMPEG'
+bpy.context.scene.render.ffmpeg.constant_rate_factor = 'PERC_LOSSLESS'
 FPS = common.envDefault("FPS", 60, int)
 RESOLUTION_X = 1920
 RESOLUTION_Y = 1080
