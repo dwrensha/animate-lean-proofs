@@ -4,7 +4,7 @@ This is a tool that accepts as input any Lean 4 theorem,
 and produces as output a Blender animation showing
 the steps of the proof smoothly evolving in sequence.
 
-![example](./example.gif)
+![example](./example.gif | width=300)
 
 [This video](https://youtu.be/KuxFWwwlEtc) provides some more background
 and shows some examples.
