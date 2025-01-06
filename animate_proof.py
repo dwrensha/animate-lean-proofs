@@ -749,11 +749,15 @@ class World:
 parser = argparse.ArgumentParser(prog="blender --python animate_proof.py --",
                                  description="animate a proof")
 parser.add_argument("file", help="json file containing animation data")
-parser.add_argument("--action_frame_count", type=int, default=40)
-parser.add_argument("--wait_frame_count", type=int, default=15)
+parser.add_argument("--action_frame_count", type=int, default=40,
+                    help="how many frames each action takes")
+parser.add_argument("--wait_frame_count", type=int, default=15,
+                    help="how many frames to wait after each action")
 parser.add_argument("--post_tactic_pause_frame_count", type=int, default=2)
-parser.add_argument("--switch_focus_frame_count", type=int, default=30)
-parser.add_argument("--foreground_ratio_y", type=float, default=0.3)
+parser.add_argument("--switch_focus_frame_count", type=int, default=30,
+                    help="how many frames to use to switch focus")
+parser.add_argument("--foreground_ratio_y", type=float, default=0.3,
+                    help="fraction of vertical space taken up by the tactic top panel")
 
 script_args = []
 found_double_dash = False
