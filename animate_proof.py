@@ -41,7 +41,7 @@ if "Cube" in bpy.data.objects:
 
 TADA_FILEPATH = "assets/tada.svg"
 
-FONTDIR = common.envDefault("FONTDIR", Path.home() / "fonts", Path)
+FONTDIR = common.envDefault("FONTDIR", Path("fonts"), Path)
 
 #MONOFONTPATH = str(FONTDIR / "DejaVuSansMono.ttf")
 # JuliaMono one looks better for chess
