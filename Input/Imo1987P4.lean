@@ -49,7 +49,7 @@ theorem imo1987_p4 : ¬∃ f : ℕ → ℕ, ∀ n, f (f n) = n + 1987 := by
        = Set.univ \ (f '' (f '' Set.univ)) := ?_
        _ = {n | n < 2 * m + 1} := ?_
     · -- Note that B = f(ℕ) - f(f(ℕ)).
-      unfold_let B
+      unfold B
       rw [Set.image_diff f_inj]
       refine Set.diff_union_diff_cancel ?_ ?_
       · exact Set.subset_univ _
