@@ -250,7 +250,6 @@ def _root_.Lean.Elab.TacticInfo.name? (t : TacticInfo) : Option Name :=
 def GOAL_PP_WIDTH : Nat := 80
 
 unsafe def visitTacticInfo (ci : ContextInfo) (ti : TacticInfo)
-    (_children : PersistentArray InfoTree)
     (acc : List TacticStep) : IO (List TacticStep) := do
   let src := ci.fileMap.source
   let stx := ti.stx
@@ -397,10 +396,10 @@ unsafe def visitTacticInfo (ci : ContextInfo) (ti : TacticInfo)
   return [TacticStep.node d acc]
 
 unsafe def visitNode (ci : ContextInfo) (info : Info)
-    (children : PersistentArray InfoTree)
+    (_children : PersistentArray InfoTree)
     (acc : List TacticStep) : IO (List TacticStep) :=
   match info with
-  | .ofTacticInfo ti => visitTacticInfo ci ti children acc
+  | .ofTacticInfo ti => visitTacticInfo ci ti acc
   | _ => pure acc
 
 unsafe def extractToplevelStep (tree : InfoTree) : IO TacticStep := do
