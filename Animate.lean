@@ -116,7 +116,7 @@ structure TacticStepData where
   name : String
 
   --- The text of the tactic, with any child tactic
-  --- text replaced by "_?"
+  --- text replaced by "?_"
   text : String
 
   tacticSpan : StringSpan
