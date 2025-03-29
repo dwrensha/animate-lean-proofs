@@ -16,7 +16,7 @@ theorem infinitude_of_primes : ∀ N, ∃ p ≥ N, Nat.Prime p := by
   have pp : Nat.Prime p := by
     refine Nat.minFac_prime ?_
     have : N ! > 0 := Nat.factorial_pos N
-    linarith
+    omega
 
   use p
   constructor
