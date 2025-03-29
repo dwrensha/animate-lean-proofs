@@ -779,3 +779,10 @@ world = World(action_frame_count = args.action_frame_count,
               post_tactic_pause_frame_count = args.post_tactic_pause_frame_count)
 
 world.init(movie_json)
+
+world.current_frame = 0
+for area in bpy.context.screen.areas:
+    if area.type == 'VIEW_3D':
+        for space in area.spaces:
+            if space.type == 'VIEW_3D':
+                space.shading.type = 'RENDERED'
