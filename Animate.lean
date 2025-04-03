@@ -504,7 +504,7 @@ unsafe def processCommands : Frontend.FrontendM (List (Environment × InfoState)
     return (env', infoState) :: (←processCommands)
 
 unsafe def processFile (config : Config) : IO Unit := do
-  Lean.searchPathRef.set compile_time_search_path%
+  initSearchPath (← findSysroot)
   let mut input ← IO.FS.readFile config.file_path
   Lean.enableInitializersExecution
   let inputCtx := Lean.Parser.mkInputContext input config.file_path.toString
