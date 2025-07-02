@@ -58,7 +58,7 @@ theorem imo1987_p4 : ¬∃ f : ℕ → ℕ, ∀ n, f (f n) = n + 1987 := by
       rw [Set.mem_setOf_eq]
       rw [←not_iff_not]
       rw [←Set.compl_eq_univ_diff]
-      rw [Set.not_mem_compl_iff]
+      rw [Set.notMem_compl_iff]
       rw [not_lt]
       simp only [Set.mem_image, Set.mem_univ, true_and, exists_exists_eq_and]
       simp only [hf]
