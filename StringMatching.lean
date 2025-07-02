@@ -61,7 +61,7 @@ def do_match (s1 s2 : String) (min_match_len : Nat := 1) (nonmatchers : String :
     (s1_reverse_order := false)
     (s2_reverse_order := false)
     : IndexMaps := Id.run do
-  let mut result := ⟨Array.mkArray s1.length none, Array.mkArray s2.length none⟩
+  let mut result := ⟨Array.replicate s1.length none, Array.replicate s2.length none⟩
 
   let cs1 := s1.toList
   let cs2 := s2.toList
