@@ -2,7 +2,7 @@ import Lean
 import Lean.Data.Json.FromToJson
 
 import Batteries.Data.RBMap.Basic
-import Mathlib.Tactic
+import Mathlib.Data.String.Defs
 
 import Annotations
 import HighlightSyntax
