@@ -47,7 +47,7 @@ theorem imo2011_p3 (f : ℝ → ℝ) (hf : ∀ x y, f (x + y) ≤ y * f x + f (f
 
     calc f (min 0 s - 1)
          ≤ (min 0 s - 1) * f x - x * f x + f (f x) := hf x (min 0 s - 1)
-       _ < s * f x - x * f x + f (f x) := by linarith [(mul_lt_mul_right hp).mpr hm]
+       _ < s * f x - x * f x + f (f x) := by linarith [(mul_lt_mul_iff_left₀ hp).mpr hm]
        _ = 0 := by rw [(eq_div_iff hp.ne.symm).mp rfl]; linarith
 
   replace f_of_neg : ∀ x < 0, f x = 0 := by
