@@ -51,13 +51,13 @@ theorem imo_2024_p2 :
       D ▸ Nat.gcd_dvd (a ^ (φ (1 + a * b) * N) + b) (b ^ (φ (1 + a * b) * N) + a)
     atomic (replace Ha := h.trans Ha; replace Hb := h.trans Hb)
     clear g D a_coprime b_coprime totient_pos h
-    reverse_s1_s2(rw [←ZMod.natCast_zmod_eq_zero_iff_dvd, pow_mul] at Ha Hb)
+    reverse_s1_s2(rw [←ZMod.natCast_eq_zero_iff, pow_mul] at Ha Hb)
     push_cast at a_euler b_euler Ha Hb
     reverse_s1_s2(rw [a_euler] at Ha; clear a_euler)
     reverse_s1_s2(rw [b_euler] at Hb; clear b_euler)
     rw [one_pow] at Ha Hb
     norm_cast at Ha Hb
-    reverse_s2(rw [ZMod.natCast_zmod_eq_zero_iff_dvd] at Ha Hb)
+    reverse_s2(rw [ZMod.natCast_eq_zero_iff] at Ha Hb)
     atomic(replace Ha := Nat.le_of_dvd (Nat.add_pos_right 1 b_pos) Ha
            replace Hb := Nat.le_of_dvd (Nat.add_pos_right 1 a_pos) Hb)
     rw [Prod.mk.injEq]
@@ -81,7 +81,7 @@ theorem imo_2024_p2 :
    obtain ⟨w, h : _ = w + 1⟩ := Nat.exists_eq_add_of_le' totient_pos
    clear totient_pos
   )
-  simp only [←ZMod.natCast_zmod_eq_zero_iff_dvd, pow_add]
+  simp only [←ZMod.natCast_eq_zero_iff]
   push_cast at a_euler b_euler ⊢
   atomic (rw [h] at a_euler b_euler ⊢; clear h)
   constructor <;>
@@ -91,7 +91,7 @@ theorem imo_2024_p2 :
   atomic(simp only [a_euler, b_euler]; clear a_euler b_euler) <;>
   simp only [one_pow] <;>
   norm_cast <;>
-  simp only [ZMod.natCast_zmod_eq_zero_iff_dvd] <;>
+  simp only [ZMod.natCast_eq_zero_iff] <;>
   ring_nf <;>
   exact dvd_refl _
 
