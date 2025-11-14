@@ -100,17 +100,17 @@ deriving Lean.ToJson, Lean.FromJson
 -- intermediate representation
 -- stage 1: tree of tactic sequences
 
-instance : Lean.ToJson String.Pos where
+instance : Lean.ToJson String.Pos.Raw where
   toJson := fun p ↦ Lean.Json.num p.byteIdx
 
-instance : Lean.FromJson String.Pos where
+instance : Lean.FromJson String.Pos.Raw where
     fromJson? := fun j ↦ do
   let idx ← j.getNat?
   return ⟨idx⟩
 
 structure StringSpan where
-  startPos : String.Pos
-  endPos : String.Pos
+  startPos : String.Pos.Raw
+  endPos : String.Pos.Raw
 deriving Lean.ToJson, Lean.FromJson, BEq
 
 structure TacticStepData where

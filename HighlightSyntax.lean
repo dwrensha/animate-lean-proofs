@@ -101,9 +101,9 @@ def assign_colors (s : String) : IO ColorMap := do
 
   let mut result := #[]
   let mut idx := 0
-  for line in output.split (· = '\n') do
+  for line in output.splitToList (· = '\n') do
     if line = "" then continue
-    let [cat, val] := line.split (· = '\t') |
+    let [cat, val] := line.splitToList (· = '\t') |
       throw (IO.userError s!"bad pygmentize output: {line}")
     let val' := (val.drop 1).dropRight 1 ++ "\""
     match Parse.str val'.mkIterator with
