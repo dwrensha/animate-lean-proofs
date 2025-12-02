@@ -539,7 +539,7 @@ unsafe def processFile (config : Config) : IO Unit := do
         if config.print_stage1 then
           IO.println s!"{ToJson.toJson step}"
         let stage2state ← stage2 step
-        if config.print_stage1 then
+        if config.print_stage2 then
           IO.println "STAGE 2:"
           stage2state.dump
         let stage3 ← stage3 config stage2state
