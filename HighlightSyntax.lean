@@ -30,7 +30,7 @@ open Lean
 
 namespace Parse
 
-def hexChar : Std.Internal.Parsec String.Iterator Nat := do
+def hexChar : Std.Internal.Parsec.String.Parser Nat := do
   let c ← Std.Internal.Parsec.any
   if '0' ≤ c ∧ c ≤ '9' then
     pure $ c.val.toNat - '0'.val.toNat
@@ -41,7 +41,7 @@ def hexChar : Std.Internal.Parsec String.Iterator Nat := do
   else
     Std.Internal.Parsec.fail "invalid hex character"
 
-def escapedChar : Std.Internal.Parsec String.Iterator Char := do
+def escapedChar : Std.Internal.Parsec.String.Parser Char := do
   let c ← Std.Internal.Parsec.any
   match c with
   | '\\' => return '\\'
@@ -61,7 +61,7 @@ def escapedChar : Std.Internal.Parsec String.Iterator Char := do
 
   | _ => Std.Internal.Parsec.fail "illegal \\u escape"
 
-partial def strCore (acc : String) : Std.Internal.Parsec String.Iterator String := do
+partial def strCore (acc : String) : Std.Internal.Parsec.String.Parser String := do
   let c ← Std.Internal.Parsec.peek!
   if c = '"' then -- "
     Std.Internal.Parsec.skip
@@ -78,7 +78,7 @@ partial def strCore (acc : String) : Std.Internal.Parsec String.Iterator String 
     else
       Std.Internal.Parsec.fail "unexpected character in string"
 
-def str : Std.Internal.Parsec String.Iterator String := strCore ""
+def str : Std.Internal.Parsec.String.Parser String := strCore ""
 
 end Parse
 end parse
@@ -106,13 +106,13 @@ def assign_colors (s : String) : IO ColorMap := do
     let [cat, val] := line.splitToList (· = '\t') |
       throw (IO.userError s!"bad pygmentize output: {line}")
     let val' := (val.drop 1).dropRight 1 ++ "\""
-    match Parse.str val'.mkIterator with
-    | Std.Internal.Parsec.ParseResult.success _ v =>
+    match Std.Internal.Parsec.String.Parser.run Parse.str val' with
+    | .ok v =>
       for _c in v.toList do
         result := result.push (cat_to_color cat)
         idx := idx + 1
 
-    | Std.Internal.Parsec.ParseResult.error _ err  =>
+    | .error err  =>
       throw (IO.userError s!"failed to parse string {val}: {err}")
 
   let _ := s.length

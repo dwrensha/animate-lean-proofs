@@ -189,9 +189,9 @@ def replace_inner_syntax (src : String) (outer : StringSpan) (inners : List Stri
   let mut curPos := outer.startPos
   for inner in inners do
     result := result ++
-      (Substring.mk src curPos inner.startPos).toString ++ replacement
+      (Substring.Raw.mk src curPos inner.startPos).toString ++ replacement
     curPos := inner.endPos
-  result := result ++ (Substring.mk src curPos outer.endPos).toString
+  result := result ++ (Substring.Raw.mk src curPos outer.endPos).toString
   return result
 
 --#eval replace_inner_syntax
@@ -201,7 +201,7 @@ def left_trim_lines (lines : String) (col : Nat) : String := Id.run do
   let mut lines := lines.splitOn "\n"
   let mut rev_result := []
   for line in lines do
-    let pfx := Substring.mk line ⟨0⟩ ⟨col⟩
+    let pfx := Substring.Raw.mk line ⟨0⟩ ⟨col⟩
     if pfx.toString = String.replicate col ' '
     then rev_result := line.drop col :: rev_result
     else rev_result := line :: rev_result
